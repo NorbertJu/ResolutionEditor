@@ -1,0 +1,2 @@
+# ResolutionEditor
+Bachelor thesis
