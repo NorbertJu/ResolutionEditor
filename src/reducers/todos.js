@@ -1,4 +1,4 @@
-import undoable from 'redux-undo'
+import undoable, {groupByActionTypes} from 'redux-undo';
 import {ADD_TODO,CHANGE_TODO,DELETE_TODO} from '../actions'
 
 const todo = (state, action) => {
@@ -36,6 +36,8 @@ const todos = (state = [], action) => {
   }
 }
 
-const undoableTodos = undoable(todos)
+const undoableTodos = undoable(todos, {
+  groupBy: groupByActionTypes([CHANGE_TODO])
+})
 
 export default undoableTodos
