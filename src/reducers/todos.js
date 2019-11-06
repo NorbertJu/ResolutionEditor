@@ -24,7 +24,7 @@ const todos = (state = [], action) => {
     case CHANGE_TODO:
       return state.map(todo => {
         if (todo.id === action.id) { 
-          todo.text = action.text;
+          return {...todo, text: action.text};
         }
         return todo;
         });

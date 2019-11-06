@@ -8,7 +8,7 @@ const TodoList = ({ todos, onTodoClick, onTodoChange}) => (
       <Todo
         key={todo.id}
         {...todo} 
-        onChange={() => onTodoChange(todo.id, "Dynamicky dopln hodnotu")}
+        onChange={(value) => onTodoChange(todo.id, value)}
         onClick={() => onTodoClick(todo.id)}
       />
     )}
