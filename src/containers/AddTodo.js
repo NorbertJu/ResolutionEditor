@@ -9,7 +9,7 @@ let AddTodo = ({ dispatch }) => {
         e.preventDefault()
         dispatch(addTodo(""))
       }}>
-        <button type="submit">
+        <button type="submit" className="btn btn-primary">
           Add Item
         </button>
       </form>

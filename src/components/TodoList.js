@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import Todo from './Todo'
 
 const TodoList = ({ todos, onTodoClick, onTodoChange}) => (
-  <ul>
+  <div style={{margin:'20px 0px'}}>
     {todos.map(todo =>
       <Todo
         key={todo.id}
@@ -12,7 +12,7 @@ const TodoList = ({ todos, onTodoClick, onTodoChange}) => (
         onClick={() => onTodoClick(todo.id)}
       />
     )}
-  </ul>
+  </div>
 )
 
 TodoList.propTypes = {

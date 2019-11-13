@@ -3,14 +3,10 @@ import { ActionCreators as UndoActionCreators } from 'redux-undo'
 import { connect } from 'react-redux'
 
 let UndoRedo = ({ canUndo, canRedo, onUndo, onRedo }) => (
-  <p>
-    <button onClick={onUndo} disabled={!canUndo}>
-      Undo
-    </button>
-    <button onClick={onRedo} disabled={!canRedo}>
-      Redo
-    </button>
-  </p>
+  <div className="btn-group" role="group">
+    <button type="button" className="btn btn-secondary" onClick={onUndo} disabled={!canUndo}>Undo</button>
+    <button type="button" className="btn btn-secondary" onClick={onRedo} disabled={!canRedo}>Redo</button>
+  </div>
 )
 
 const mapStateToProps = (state) => ({

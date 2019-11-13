@@ -1,12 +1,12 @@
 import React from 'react'
 import AddTodo from '../containers/AddTodo'
-import VisibleTodoList from '../containers/VisibleTodoList'
+import ActualTodoList from '../containers/ActualTodoList'
 import UndoRedo from '../containers/UndoRedo'
 
 const App = () => (
   <div>
     <UndoRedo />
-    <VisibleTodoList />
+    <ActualTodoList />
     <AddTodo />
   </div>
 )
