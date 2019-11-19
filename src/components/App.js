@@ -1,13 +1,13 @@
 import React from 'react'
-import AddTodo from '../containers/AddTodo'
-import ActualTodoList from '../containers/ActualTodoList'
+import AddStep from '../containers/AddStep'
+import ActualProof from '../containers/ActualProof'
 import UndoRedo from '../containers/UndoRedo'
 
 const App = () => (
   <div>
     <UndoRedo />
-    <ActualTodoList />
-    <AddTodo />
+    <ActualProof />
+    <AddStep />
   </div>
 )
 

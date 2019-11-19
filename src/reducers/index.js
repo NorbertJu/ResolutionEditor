@@ -1,8 +1,8 @@
 import { combineReducers } from 'redux'
-import todos from './todos'
+import steps from './steps'
 
-const todoApp = combineReducers({
-  todos,
+const stepApp = combineReducers({
+  steps,
 })
 
-export default todoApp
+export default stepApp

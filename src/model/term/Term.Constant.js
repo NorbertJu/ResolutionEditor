@@ -10,6 +10,15 @@ class Constant extends Term {
     return this.name;
   }
 
+  equals(other) {
+    if (!(other instanceof Constant) || this.name !== other.name) return false;
+    return true;
+  }
+
+  substitute(variable, term){
+    return new Constant(this.name);
+  }
+
 }
 
 export default Constant;

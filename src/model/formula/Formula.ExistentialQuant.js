@@ -8,7 +8,7 @@ class ExistentialQuant extends Formula {
   }
 
   toString() {
-    return `∃${this.variable} (${this.subfs.toString()})`;
+    return `∃${this.variable} ${this.subfs.toString()}`;
   }
 
 }

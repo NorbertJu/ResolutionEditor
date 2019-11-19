@@ -8,10 +8,6 @@ class Term {
     return "";
   }
 
-  name() {
-    return this.name;
-  }
-
 }
 
 export default Term;

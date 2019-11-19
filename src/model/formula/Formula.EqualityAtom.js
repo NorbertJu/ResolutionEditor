@@ -7,7 +7,7 @@ class EqualityAtom extends Formula {
   }
 
   toString() {
-    return `(${this.subfs[0].toString()}) = (${this.subfs[1].toString()})`;
+    return `(${this.subfs[0].toString()} = ${this.subfs[1].toString()})`;
   }
 
 }

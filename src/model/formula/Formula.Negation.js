@@ -7,7 +7,7 @@ class Negation extends Formula {
   }
 
   toString() {
-    return `¬(${this.subfs.toString()})`;
+    return `¬${this.subfs.toString()}`;
   }
 
 }
