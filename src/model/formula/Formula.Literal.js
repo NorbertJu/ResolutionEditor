@@ -33,10 +33,10 @@ class Literal extends Formula {
     return true;
   }
 
-  substitute(variable, term){
+  substitute(map){
     let res = new Literal(this.neg, this.name);
     for (let i = 0; i < this.terms.length; i++) {
-      res.terms.push(this.terms[i].substitute(variable, term));
+      res.terms.push(this.terms[i].substitute(map));
     }
     return res;
   }

@@ -27,10 +27,10 @@ class FunctionTerm extends Term {
     return true;
   }
 
-  substitue(variable, term){
+  substitute(map){
     let res = new FunctionTerm(this.name)
     for (let i = 0; i < this.subts.length; i++) {
-      res.subts.push(this.subts[i].substitute(variable, term));
+      res.subts.push(this.subts[i].substitute(map));
     }
     return res;
   }

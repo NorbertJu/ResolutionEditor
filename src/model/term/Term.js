@@ -8,6 +8,10 @@ class Term {
     return "";
   }
 
+  substitute(map) {
+    return new Term(this.name);
+  }
+
 }
 
 export default Term;

@@ -2,7 +2,7 @@ import Formula from "./Formula";
 
 class Clause extends Formula {
 
-  constructor(lits = []) {
+  constructor(lits = new Map()) {
     super();
     this.lits = lits;
   }
@@ -19,26 +19,51 @@ class Clause extends Formula {
   }
 
   equals(other){ 
-    if (!(other instanceof Clause)) return false;
-    for (let i = 0; i < this.lits.length; i++) {
-      if (!other.lits.includes(this.lits[i])) {
-        return false;
-      }
-    }
-    for (let i = 0; i < other.lits.length; i++) {
-      if (!this.lits.includes(other.lits[i])) {
-        return false;
-      }
+    if (!(other instanceof Clause) && this.lits.size !== other.lits.size) return false;
+    for (let [lit, count] of this.lits){
+      if (!other.has(lit)) return false;
+      if (other.get(lit) != count) return false;
     }
     return true;
   }
 
-  substitute(variable, term) {
+  substitute(map) {
     let res = new Clause();
-    for (let i = 0; i < this.lits.length; i++) {
-      res.lits.push(this.lits[i].substitute(variable, term));
+    for (let [lit, count] of this.lits) {
+      let subLit = lit.substitute(map);
+      if (res.has(subLit)){
+        res.set(subLit, res.get(subLit) + count);
+      } else {
+        res.set(subLit, count);
+      }
     }
     return res;
+  }
+
+  has(key){
+    for (let [lit, count] of this.lits) {
+      if (lit.equals(key)){
+        return true;
+      }
+    }
+    return false;
+  }
+
+  get(key){
+    for (let [lit, count] of this.lits) {
+      if (lit.equals(key)){
+        return count;
+      }
+    }
+    return undefined;
+  }
+
+  set(key, value){
+    if (this.has(key)){
+      this.lits.delete(key);
+    }
+    this.lits.set(key, value);
+    return this.lits;
   }
 
 }

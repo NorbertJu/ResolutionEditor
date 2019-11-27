@@ -15,7 +15,7 @@ class Constant extends Term {
     return true;
   }
 
-  substitute(variable, term){
+  substitute(map){
     return new Constant(this.name);
   }
 

@@ -15,9 +15,11 @@ class Variable extends Term {
     return true;
   }
 
-  substitute(variable, term){
-    if (this.equals(variable)){
-      return term;
+  substitute(map){
+    for (let [variable, term] of map){
+      if (this.equals(variable)){
+        return term;
+      }
     }
     return new Variable(this.name);
   }
