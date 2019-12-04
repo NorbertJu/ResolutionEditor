@@ -6,13 +6,8 @@ class Constant extends Term {
     super(name);
   }
 
-  toString() {
-    return this.name;
-  }
-
   equals(other) {
-    if (!(other instanceof Constant) || this.name !== other.name) return false;
-    return true;
+    return other instanceof Constant && this.name === other.name
   }
 
   substitute(map){

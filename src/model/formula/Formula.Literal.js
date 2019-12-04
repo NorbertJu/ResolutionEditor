@@ -11,34 +11,24 @@ class Literal extends Formula {
 
   toString() {
     let res = '';
-    if (this.neg) {
-      res += '¬';
-    }
-    res += this.name + '(';
-    for (let i = 0; i < this.terms.length; i++) {
-      if (i > 0) {
-        res += ', ';
-      }
-      res += this.terms[i].toString();
-    }
-    res += ')';
-    return res;
+    if (this.neg) res += '¬';
+    return res + this.name + '(' + this.terms.map(term => term.toString()).join(', ') + ')';
   }
 
   equals(other) {
-    if (!(other instanceof Literal) || this.neg !== other.neg || other.name !== this.name || this.terms.length !== other.terms.length) return false;
-    for (let i = 0; i < this.terms.length; i++) {
-      if (!this.terms[i].equals(other.terms[i])) return false;
-    }
-    return true;
+    return other instanceof Literal &&
+      this.neg === other.neg &&
+      this.name === other.name &&
+      this.terms.length === other.terms.length &&
+      this.terms.every((term, i) => term.equals(other.terms[i]))
   }
 
   substitute(map){
-    let res = new Literal(this.neg, this.name);
-    for (let i = 0; i < this.terms.length; i++) {
-      res.terms.push(this.terms[i].substitute(map));
-    }
-    return res;
+    return new Literal(
+      this.neg,
+      this.name,
+      this.terms.map( term => term.substitute(map))
+    );
   }
 
 }

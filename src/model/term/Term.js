@@ -5,11 +5,15 @@ class Term {
   }
 
   toString() {
-    return "";
+    return this.name;
   }
 
   substitute(map) {
-    return new Term(this.name);
+    new Error('Unimplemented');
+  }
+
+  equals() {
+    new Error('Unimplemented');
   }
 
 }

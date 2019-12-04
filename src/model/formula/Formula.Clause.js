@@ -2,20 +2,13 @@ import Formula from "./Formula";
 
 class Clause extends Formula {
 
-  constructor(lits = new Map()) {
+  constructor(lits = []) {
     super();
     this.lits = lits;
   }
 
   toString() {
-    let res = '';
-    for (let i = 0; i < this.lits.length; i++) {
-      if (i > 0) {
-        res += ' ∨ ';
-      }
-      res += this.lits[i].toString();
-    }
-    return res;
+    return this.lits.map( lit => lit.toString() ).join(' ∨ ');
   }
 
   equals(other){ 
@@ -38,6 +31,10 @@ class Clause extends Formula {
       }
     }
     return res;
+  }
+
+  get() {
+    
   }
 
   has(key){

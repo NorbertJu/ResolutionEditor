@@ -6,13 +6,8 @@ class Variable extends Term {
     super(name);
   }
 
-  toString() {
-    return this.name;
-  }
-
   equals(other) {
-    if (!(other instanceof Variable) || this.name !== other.name) return false;
-    return true;
+    return other instanceof Variable && this.name === other.name
   }
 
   substitute(map){
