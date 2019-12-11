@@ -1,10 +1,12 @@
 import Formula from "./Formula";
+import { throwStatement } from "@babel/types";
 
 class Clause extends Formula {
 
   constructor(lits = []) {
     super();
     this.lits = lits;
+    this.litsMultiset = null;
   }
 
   toString() {
@@ -12,34 +14,45 @@ class Clause extends Formula {
   }
 
   equals(other){ 
-    if (!(other instanceof Clause) && this.lits.size !== other.lits.size) return false;
-    for (let [lit, count] of this.lits){
-      if (!other.has(lit)) return false;
-      if (other.get(lit) != count) return false;
+    if (!(other instanceof Clause) || this.lits.length !== other.lits.length) return false;
+    for (let tuple of this.getLitsMultiset()){
+      if (!other.has(tuple[0])) return false;
+      if (other.get(tuple[0]) != tuple[1]) return false;
     }
     return true;
   }
 
   substitute(map) {
-    let res = new Clause();
-    for (let [lit, count] of this.lits) {
-      let subLit = lit.substitute(map);
-      if (res.has(subLit)){
-        res.set(subLit, res.get(subLit) + count);
-      } else {
-        res.set(subLit, count);
+    return new Clause (
+      this.lits.map( lit => lit.substitute(map))
+    );
+  }
+
+  getLitsMultiset() {
+    if (this.litsMultiset != null) {
+      return this.litsMultiset;
+    }
+    this.litsMultiset = [];
+    var contains = false;
+    for (let lit in this.lits){
+      contains = false;
+      for (let tuple in this.litsMultiset){
+        if (tuple[0] === lit.name) {
+          tuple[1]++;
+          contains = true;
+          break;
+        }
+      }
+      if (!contains) {
+        this.litsMultiset.push([lit.name, 1]);
       }
     }
-    return res;
+    return this.litsMultiset = [];
   }
-
-  get() {
-    
-  }
-
+  
   has(key){
-    for (let [lit, count] of this.lits) {
-      if (lit.equals(key)){
+    for (let tuple of this.litsMultiset) {
+      if (tuple[0] === key){
         return true;
       }
     }
@@ -47,20 +60,12 @@ class Clause extends Formula {
   }
 
   get(key){
-    for (let [lit, count] of this.lits) {
-      if (lit.equals(key)){
-        return count;
+    for (let tuple of this.lits) {
+      if (tuple[0] === key){
+        return tuple[1];
       }
     }
     return undefined;
-  }
-
-  set(key, value){
-    if (this.has(key)){
-      this.lits.delete(key);
-    }
-    this.lits.set(key, value);
-    return this.lits;
   }
 
 }
