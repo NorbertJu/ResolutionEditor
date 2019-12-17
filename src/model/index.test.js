@@ -1,47 +1,146 @@
 import * as model from './index'
 
-var v1 = new model.Variable("x"), v2 = new model.Variable("y"), v3 = new model.Variable("z");
-var c1 = new model.Constant("A"), c2 = new model.Constant("B");
-var f1 = new model.Function("f", [v1, c1]), f2 = new model.Function("g", [v1, f1]);
-var l1 = new model.Literal(false, "p", [v2, c2, f2]), l2 = new model.Literal(true, "l", [v1, c2]), l3 = new model.Literal(true, "q", [v3, v1]);
-var cl1 = new model.Clause([[l1,1], [l2,1], [l3,1]]), cl2 = new model.Clause([[l3,2]]);
+const V = name => new model.Variable(name);
+const C = (name) => new model.Constant(name);
+const F = (name, args) => new model.Function(name, args);
+const L = (neg, name, args) => new model.Literal(neg, name, args);
+const Cl = (args) => new model.Clause(args);
 
-// Termy
+const Vx = V("x");
+const Vy = V("y");
+const Vz = V("z");
+const CA = C("A");
+const CB = C("B");
+const Ff = F("f", [Vx, CA]);
+const Fg = F("g", [Vx, Ff]);
+const Lp = L(false, "p", [Vy, CB, Fg]);
+const Ll = L(true, "l", [Vx, CB]);
+const Lq = L(true, "q", [Vz, Vx]);
+const Cl1 = Cl([Lp, Ll, Lq]);
+const Cl2 = Cl([Lq]);
 
-test('variable', () => {
-    expect(new model.Variable("a").toString()).toBe("a");
+
+describe('toString()', () => {
+test('Variable', () => {
+    expect(Vx.toString()).toBe("x");
+});
+test('Constant', () => {
+    expect(CB.toString()).toBe("B");
+});
+test('Function', () => {
+    expect(Ff.toString()).toBe("f(x, A)");
+});
+test('Literal', () => {
+    expect(Lp.toString()).toBe("p(y, B, g(x, f(x, A)))");
+});
+test('Clause', () => {
+    expect(Cl1.toString()).toBe("p(y, B, g(x, f(x, A))) ∨ ¬l(x, B) ∨ ¬q(z, x)");
+});
 });
 
-test('constant', () => {
-    expect(new model.Constant("A")).toStrictEqual(c1);
+
+describe('equals()', () => {
+test('Variable', () => {
+    expect((Vx).equals(V("x"))).toBe(true);
+});
+test('Constant', () => {
+    expect((CA).equals(C("A"))).toBe(true);
+});
+test('Function', () => {
+    expect((Fg).equals(F("g", [V("x"), F("f", [V("x"), C("A")])]))).toBe(true);
+});
+test('Literal', () => {
+    expect((Lp).equals(L(false, "p", [
+        V("y"), 
+        C("B"), 
+        F("g", [V("x"), F("f", [V("x"), C("A")])])
+    ]))).toBe(true);
+});
+test('Clause', () => {
+    expect((Cl1).equals(Cl([Lq, Lp, Ll]))).toBe(true);
+    expect((Cl1).equals(Cl2)).toBe(false);
+    expect((Cl([Ll, Lq, Lq])).equals(Cl([Lq, Ll, Lq]))).toBe(true);
+    expect((Cl([Ll])).equals(Cl([Ll, Ll]))).toBe(false);
+});
 });
 
-test('function term', () => {
-    expect(new model.Function("f",[new model.Variable("a")]).equals(new model.Function("f",[new model.Variable("a")]))).toBe(true);
+
+describe('substitute()', () => {
+test('Variable', () => {
+    expect(Vx.substitute(new Map([["x", Vy]]))).toStrictEqual(Vy);
+    expect(Vx.substitute(new Map([["x", CA]]))).toStrictEqual(CA);
+    expect(Vx.substitute(new Map([["x", Ff]]))).toStrictEqual(Ff);
 });
-
-//Substitucia a Rovnost
-
-test('variable substitute', () => {
-    expect(new model.Variable("a").substitute([[new model.Variable("a"), new model.Variable("b")]])).toStrictEqual(new model.Variable("b"));
+test('Constant', () => {
+    expect(CA.substitute(new Map([["x", CB]]))).toStrictEqual(CA);
 });
-
-test('literal substitute', () => {
-    expect(l1.substitute([[v1, v2]])).toStrictEqual(new model.Literal(false, "p", [v2, c2, new model.Function("g", [v2, new model.Function("f", [v2,c1])])]));
+test('Function', () => {
+    expect(Fg.substitute(new Map([["x", Vy]]))).toStrictEqual(F("g", [Vy, F("f", [Vy, CA])]));
+    expect(Fg.substitute(new Map([["x", CA]]))).toStrictEqual(F("g", [CA, F("f", [CA, CA])]));
+    expect(Fg.substitute(new Map([["x", Ff]]))).toStrictEqual(F("g", [Ff, F("f", [Ff, CA])]));
 });
-
-test('clause substitute', () => {
-    expect(cl1.substitute([[v1, v2],[v3,c2]])).toStrictEqual(new model.Clause(new Map([[new model.Literal(false, "p", [v2, c2, new model.Function("g", [v2, new model.Function("f", [v2,c1])])]),1], [new model.Literal(true, "l", [v2, c2]),1], [new model.Literal(true, "q", [c2, v2]),1]])));
+test('Literal', () => {
+    expect(Lp.substitute(new Map([["x", Vy]]))).toStrictEqual(L(
+        false,
+        "p",
+        [Vy, CB, F("g", [Vy, F("f", [Vy, CA])])]
+    ));
+    expect(Lp.substitute(new Map([["x", CA]]))).toStrictEqual(L(
+        false,
+        "p",
+        [Vy, CB, F("g", [CA, F("f", [CA, CA])])]
+    ));
+    expect(Lp.substitute(new Map([["x", Ff]]))).toStrictEqual(L(
+        false,
+        "p",
+        [Vy, CB, F("g", [Ff, F("f", [Ff, CA])])]
+    ));
 });
-
-test('clause equals', () => {
-    expect(cl1.equals(new model.Clause(new Map([[new model.Literal(false, "p", [new model.Variable("y"), new model.Constant("B"), new model.Function("g", [new model.Variable("x"), new model.Function("f", [new model.Variable("x"), new model.Constant("A")])])]),1], [new model.Literal(true, "l", [new model.Variable("x"), new model.Constant("B")]),1], [new model.Literal(true, "q", [new model.Variable("z"), new model.Variable("x")]),1]])))).toBe(true);
+test('Clause', () => {
+    expect(Cl1.substitute(new Map([["x", Vy]]))).toStrictEqual(Cl(
+        [
+            L(
+                false,
+                "p",
+                [Vy, CB, F("g", [Vy, F("f", [Vy, CA])])]
+            ),
+            L(true, "l", [V("y"), CB]),
+            L(true, "q", [Vz, V("y")])
+        ]
+    ));
+    expect(Cl1.substitute(new Map([["x", CA]]))).toStrictEqual(Cl(
+        [
+            L(
+                false,
+                "p",
+                [Vy, CB, F("g", [CA, F("f", [CA, CA])])]
+            ),
+            L(true, "l", [CA, CB]),
+            L(true, "q", [Vz, CA])
+        ]
+    ));
+    expect(Cl1.substitute(new Map([["x", Ff]]))).toStrictEqual(Cl(
+        [
+            L(
+                false,
+                "p",
+                [Vy, CB, F("g", [Ff, F("f", [Ff, CA])])]
+            ),
+            L(true, "l", [Ff, CB]),
+            L(true, "q", [Vz, Ff])
+        ]
+    ));
+    expect(Cl1.substitute(new Map([["x", Vy], ["y", Vz], ["z", CB]]))).toStrictEqual(Cl(
+        [
+            L(
+                false,
+                "p",
+                [Vz, CB, F("g", [Vy, F("f", [Vy, CA])])]
+            ),
+            L(true, "l", [V("y"), CB]),
+            L(true, "q", [CB, V("y")])
+        ]
+    ));
+    expect(Cl1.substitute(new Map([["B", Vy]]))).toStrictEqual(Cl([Lp, Ll, Lq]));
 });
-
-test('clause substitute 2', () => {
-    expect(cl2.substitute([[v1, v2]])).toStrictEqual(new model.Clause(new Map([[new model.Literal(true, "q", [new model.Variable("z"), new model.Variable("y")]),2]])));
-});
-
-test('clause equals 2', () => {
-    expect(cl2.equals(new model.Clause(new Map([[new model.Literal(true, "q", [new model.Variable("z"), new model.Variable("x")]),2]])))).toBe(true);
 });

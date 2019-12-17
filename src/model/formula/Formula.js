@@ -4,12 +4,20 @@ class Formula {
     this.subfs = subfs;
   }
 
-  toString() {
-    return "";
-  }
-
   subfs() {
     return this.subfs;
+  }
+
+  toString() {
+    new Error('Unimplemented');
+  }
+
+  equals(other){ 
+    new Error('Unimplemented');
+  }
+
+  substitute(map) {
+    new Error('Unimplemented');
   }
 
 }

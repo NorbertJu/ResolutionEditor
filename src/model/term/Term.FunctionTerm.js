@@ -8,31 +8,21 @@ class FunctionTerm extends Term {
   }
 
   toString() {
-    let res = this.name + '(';
-    for (let i = 0; i < this.subts.length; i++) {
-      if (i > 0) {
-        res += ', ';
-      }
-      res += this.subts[i].toString();
-    }
-    res += ')';
-    return res;
+    return this.name + '(' + this.subts.map(subt => subt.toString()).join(', ') + ')';
   }
 
   equals(other) {
-    if (!(other instanceof FunctionTerm) || this.name !== other.name || this.subts.length !== other.subts.length) return false;
-    for (let i = 0; i < this.subts.length; i++) {
-      if (!this.subts[i].equals(other.subts[i])) return false;
-    }
-    return true;
+    return other instanceof FunctionTerm &&
+      this.name === other.name &&
+      this.subts.length === other.subts.length &&
+      this.subts.every((subt, i) => subt.equals(other.subts[i]))
   }
 
   substitute(map){
-    let res = new FunctionTerm(this.name)
-    for (let i = 0; i < this.subts.length; i++) {
-      res.subts.push(this.subts[i].substitute(map));
-    }
-    return res;
+    return new FunctionTerm(
+      this.name,
+      this.subts.map( subt => subt.substitute(map))
+    );
   }
 
 }
