@@ -2,14 +2,17 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import Step from './Step'
 
-const Proof = ({ steps, onStepClick, onStepChange}) => (
+const Proof = ({ steps, onStepDelete, onStepChange, onStepInsert, onStepUp, onStepDown}) => (
   <div style={{margin:'20px 0px'}}>
-    {steps.map(step =>
+    {steps.map((step, index) =>
       <Step
         key={step.id}
         {...step} 
         onChange={(value) => onStepChange(step.id, value)}
-        onClick={() => onStepClick(step.id)}
+        onDelete={() => onStepDelete(step.id)}
+        onInsert={() => onStepInsert(index)}
+        onUp={index === 0 ? () => console.log("disabled") : () => onStepUp(index)}
+        onDown={index === steps.length-1 ? () => console.log("disabled") : () => onStepDown(index)}
       />
     )}
   </div>
@@ -20,8 +23,11 @@ Proof.propTypes = {
     id: PropTypes.number.isRequired,
     text: PropTypes.string.isRequired
   }).isRequired).isRequired,
-  onStepClick: PropTypes.func.isRequired,
-  onStepChange: PropTypes.func.isRequired
+  onStepDelete: PropTypes.func.isRequired,
+  onStepChange: PropTypes.func.isRequired,
+  onStepInsert: PropTypes.func.isRequired,
+  onStepUp: PropTypes.func.isRequired,
+  onStepDown: PropTypes.func.isRequired
 }
 
 export default Proof
