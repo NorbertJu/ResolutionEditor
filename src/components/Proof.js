@@ -8,11 +8,12 @@ const Proof = ({ steps, onStepDelete, onStepChange, onStepInsert, onStepUp, onSt
       <Step
         key={step.id}
         {...step} 
+        index={index}
         onChange={(value) => onStepChange(step.id, value)}
         onDelete={() => onStepDelete(step.id)}
         onInsert={() => onStepInsert(index)}
-        onUp={index === 0 ? () => console.log("disabled") : () => onStepUp(index)}
-        onDown={index === steps.length-1 ? () => console.log("disabled") : () => onStepDown(index)}
+        onUp={index === 0 ? null : () => onStepUp(index)}
+        onDown={index === steps.length-1 ? null : () => onStepDown(index)}
       />
     )}
   </div>
