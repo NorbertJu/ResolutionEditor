@@ -1,53 +1,107 @@
 import undoable, {groupByActionTypes} from 'redux-undo';
 import {ADD_STEP,CHANGE_STEP,DELETE_STEP,INSERT_STEP, STEP_UP, STEP_DOWN} from '../actions'
 
-const steps = (state = [], action) => {
+const steps = (state = {order: [], allSteps: new Map(), rank: new Map()}, action) => {
   switch (action.type) {
     case ADD_STEP:
-      return [
-        ...state,
-        {
-          id: action.id,
-          text: ""
-        }
-      ];
+      return Object.assign({}, state, {
+        order: [
+          ...state.order,
+          action.id,        
+        ],
+        allSteps: new Map([
+          ...state.allSteps,
+          [action.id, {
+            formula: "",
+            rule: "",
+            params: []
+          }]
+        ]),
+        rank: new Map([
+          ...state.rank,
+          [action.id, state.order.length]
+        ])
+      }) 
 
     case CHANGE_STEP:
-      return state.map(step => {
-        if (step.id === action.id) { 
-          return {...step, text: action.text};
-        }
-        return step;
-      });
+      return Object.assign({}, state, {
+        allSteps: new Map([
+          ...state.allSteps,
+          [action.id, {
+            formula: action.text,
+            rule: "",
+            params: []
+          }]
+        ])
+      }) 
         
     case DELETE_STEP:
-      return state.filter(step => step.id !== action.id);
+      let delOrder = state.rank.get(action.id);
+      let newSteps = new Map(state.allSteps);
+      newSteps.delete(action.id);
+      let newRank = new Map(state.rank);
+      newRank.delete(action.id);
+      for (var [key, value] of newRank.entries()) {
+        if (value > delOrder) {
+          newRank.set(key, value-1)
+        }
+      }
+      return Object.assign({}, state, {
+        order: [
+          ...state.order.filter(id => id !== action.id)       
+        ],
+        allSteps: newSteps,
+        rank: newRank,
+      }) 
 
     case INSERT_STEP:
-      return [
-        ...state.slice(0, action.position),
-        {
-          id: action.id,
-          text: ""
-        },
-        ...state.slice(action.position)
-      ];
+      return Object.assign({}, state, {
+        order: [
+          ...state.order.slice(0, action.position),
+          action.id,
+          ...state.order.slice(action.position)     
+        ],
+        allSteps: new Map([
+          ...state.allSteps,
+          [action.id, {
+            formula: "",
+            rule: "",
+            params: []
+          }]
+        ]),
+        rank: new Map([
+          ...state.rank,
+          [action.id, action.position]
+        ])
+      }) 
 
     case STEP_UP:
-      return [
-        ...state.slice(0, action.position-1),
-        state[action.position],
-        state[action.position-1],
-        ...state.slice(action.position+1)
-      ];
+      newRank = new Map(state.rank);
+      newRank.set(action.id, action.position-1);
+      newRank.set(state.rank.get(state.order[action.position-1]), action.position);
+      return Object.assign({}, state, {
+        order: [
+          ...state.order.slice(0, action.position-1),
+          state.order[action.position],
+          state.order[action.position-1],
+          ...state.order.slice(action.position+1)     
+        ],
+        rank: newRank
+      }) 
 
     case STEP_DOWN:
-      return [
-        ...state.slice(0, action.position),
-        state[action.position+1],
-        state[action.position],
-        ...state.slice(action.position+2)
-      ];
+      newRank = new Map(state.rank);
+      newRank.set(action.id, action.position+1);
+      newRank.set(state.rank.get(state.order[action.position+1]), action.position);
+      return Object.assign({}, state, {
+        order: [
+          ...state.order.slice(0, action.position),
+          state.order[action.position+1],
+          state.order[action.position],
+          ...state.order.slice(action.position+2)     
+        ],
+        rank: newRank
+      }) 
 
     default:
       return state

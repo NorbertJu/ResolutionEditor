@@ -1,7 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
-const Step = ({ index, text, onChange ,onDelete, onInsert, onUp, onDown }) => (
+const Step = ({ index, formula, onChange ,onDelete, onInsert, onUp, onDown }) => (
   <div>
   <button type="button" className="btn btn-light btn-sm" onClick={onInsert} style={{float:"right"}}> + </button>
   
@@ -9,7 +9,7 @@ const Step = ({ index, text, onChange ,onDelete, onInsert, onUp, onDown }) => (
     <div className="input-group-prepend">
       <span className="input-group-text">{index+1}</span>
     </div>
-    <input type="text" className="form-control" name="item" onChange={e => onChange(e.target.value)} value={text}/>
+    <input type="text" className="form-control" name="item" onChange={e => onChange(e.target.value)} value={formula}/>
     <div className="input-group-append">
       <button type="button" className="btn btn-outline-secondary btn-sm" onClick={onUp} disabled={onUp===null}> ↑ </button>
       <button type="button" className="btn btn-outline-secondary btn-sm" onClick={onDown} disabled={onDown===null}> ↓ </button>
@@ -24,7 +24,9 @@ Step.propTypes = {
   onChange: PropTypes.func.isRequired,
   onDelete: PropTypes.func.isRequired,
   onInsert: PropTypes.func.isRequired,
-  text: PropTypes.string.isRequired
+  formula: PropTypes.string.isRequired,
+  rule: PropTypes.string.isRequired,
+  params: PropTypes.arrayOf(PropTypes.number.isRequired)
 }
 
 export default Step

@@ -9,7 +9,7 @@ let AddStep = ({ dispatch }) => {
         e.preventDefault()
         dispatch(addStep())
       }}>
-        <button type="submit" className="btn btn-primary">
+        <button type="submit" className="btn btn-outline-success">
           Add Step
         </button>
       </form>
