@@ -23,6 +23,14 @@ class Literal extends Formula {
       this.terms.every((term, i) => term.equals(other.terms[i]))
   }
 
+  negation(){
+    return new Literal(
+      !this.neg,
+      this.name,
+      this.terms
+    )
+  }
+
   substitute(map){
     return new Literal(
       this.neg,

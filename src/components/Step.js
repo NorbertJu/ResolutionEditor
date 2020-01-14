@@ -1,7 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
-const Step = ({ index, formula, onChange ,onDelete, onInsert, onUp, onDown }) => (
+const Step = ({ index, formula, rule, params, onChange ,onDelete, onInsert, onUp, onDown, onRule, onParams }) => (
   <div>
   <button type="button" className="btn btn-light btn-sm" onClick={onInsert} style={{float:"right"}}> + </button>
   
@@ -11,6 +11,12 @@ const Step = ({ index, formula, onChange ,onDelete, onInsert, onUp, onDown }) =>
     </div>
     <input type="text" className="form-control" name="item" onChange={e => onChange(e.target.value)} value={formula}/>
     <div className="input-group-append">
+      <select className="form-control" onChange={e => onRule(e.target.value)} value={rule}>
+        <option>Formula</option>
+        <option>Rezolvencia</option>
+        <option>Faktorizácia</option>
+      </select>
+      {(rule === "Rezolvencia" || rule === "Faktorizácia") && <input type="text" className="form-control" name="params" onChange={e => onParams(e.target.value)} value={params}/>}
       <button type="button" className="btn btn-outline-secondary btn-sm" onClick={onUp} disabled={onUp===null}> ↑ </button>
       <button type="button" className="btn btn-outline-secondary btn-sm" onClick={onDown} disabled={onDown===null}> ↓ </button>
       <button className="btn btn-outline-danger" type="button" onClick={onDelete} >X</button>
@@ -26,7 +32,7 @@ Step.propTypes = {
   onInsert: PropTypes.func.isRequired,
   formula: PropTypes.string.isRequired,
   rule: PropTypes.string.isRequired,
-  params: PropTypes.arrayOf(PropTypes.number.isRequired)
+  params: PropTypes.string.isRequired
 }
 
 export default Step

@@ -1,5 +1,7 @@
 export const ADD_STEP = 'ADD_STEP';
 export const CHANGE_STEP = 'CHANGE_STEP';
+export const CHANGE_RULE = 'CHANGE_RULE';
+export const CHANGE_PARAMS = 'CHANGE_PARAMS';
 export const DELETE_STEP = 'DELETE_STEP';
 export const INSERT_STEP = 'INSERT_STEP';
 export const STEP_UP = 'STEP_UP';
@@ -14,6 +16,18 @@ export const addStep = () => ({
 
 export const changeStep = (id, text) => ({
   type: CHANGE_STEP,
+  id,
+  text
+})
+
+export const changeRule = (id, text) => ({
+  type: CHANGE_RULE,
+  id,
+  text
+})
+
+export const changeParams = (id, text) => ({
+  type: CHANGE_PARAMS,
   id,
   text
 })

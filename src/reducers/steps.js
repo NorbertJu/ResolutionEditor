@@ -1,5 +1,5 @@
 import undoable, {groupByActionTypes} from 'redux-undo';
-import {ADD_STEP,CHANGE_STEP,DELETE_STEP,INSERT_STEP, STEP_UP, STEP_DOWN} from '../actions'
+import {ADD_STEP,CHANGE_STEP,DELETE_STEP,INSERT_STEP, STEP_UP, STEP_DOWN, CHANGE_RULE, CHANGE_PARAMS} from '../actions'
 
 const steps = (state = {order: [], allSteps: new Map(), rank: new Map()}, action) => {
   switch (action.type) {
@@ -14,7 +14,7 @@ const steps = (state = {order: [], allSteps: new Map(), rank: new Map()}, action
           [action.id, {
             formula: "",
             rule: "",
-            params: []
+            params: ""
           }]
         ]),
         rank: new Map([
@@ -29,8 +29,32 @@ const steps = (state = {order: [], allSteps: new Map(), rank: new Map()}, action
           ...state.allSteps,
           [action.id, {
             formula: action.text,
-            rule: "",
-            params: []
+            rule: state.allSteps.get(action.id).rule,
+            params: state.allSteps.get(action.id).params
+          }]
+        ])
+      }) 
+
+    case CHANGE_RULE:
+      return Object.assign({}, state, {
+        allSteps: new Map([
+          ...state.allSteps,
+          [action.id, {
+            formula: state.allSteps.get(action.id).formula,
+            rule: action.text,
+            params: state.allSteps.get(action.id).params
+          }]
+        ])
+      }) 
+
+    case CHANGE_PARAMS:
+      return Object.assign({}, state, {
+        allSteps: new Map([
+          ...state.allSteps,
+          [action.id, {
+            formula: state.allSteps.get(action.id).formula,
+            rule: state.allSteps.get(action.id).rule,
+            params: action.text
           }]
         ])
       }) 
@@ -109,7 +133,7 @@ const steps = (state = {order: [], allSteps: new Map(), rank: new Map()}, action
 }
 
 const undoableSteps = undoable(steps, {
-  groupBy: groupByActionTypes([CHANGE_STEP])
+  groupBy: groupByActionTypes([CHANGE_STEP, CHANGE_PARAMS]),
 })
 
 export default undoableSteps
