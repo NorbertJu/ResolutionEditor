@@ -147,46 +147,48 @@ test('Clause', () => {
 });
 });
 
-describe('resolution()', () => {
+describe('isResolvent()', () => {
     test('Simple', () => {
-        expect(Cl([]).resolution(Cl2, Cl3, new Map([["y", Vz]]))).toBe(true);
+        expect(Cl([]).isResolvent(Cl2, Cl3, new Map(),new Map([["y", Vz]]))).toBe(true);
     });
 
     test('Medium', () => {
-        expect(Cl([Lp, Ll]).substitute(new Map([["y", Vz]])).resolution(Cl1, Cl3, new Map([["y", Vz]]))).toBe(true);
+        expect(Cl([Lp, Ll]).substitute(new Map([["y", Vz]])).isResolvent(Cl1, Cl3, new Map(), new Map([["y", Vz]]))).toBe(true);
     });
 
     test('Multiple', () => {
-        expect(Cl([L(false,"l",[V("x")]), L(true,"l",[V("x")])]).resolution(
+        expect(Cl([L(false,"l",[V("x")]), L(true,"l",[V("x")])]).isResolvent(
             Cl([L(false,"p",[V("y")]), L(false,"l",[V("x")])]),
             Cl([L(true,"p",[V("y")]), L(true,"l",[V("x")])]),
+            new Map(),
             new Map()
         )).toBe(true);
 
-        expect(Cl([L(false,"p",[V("y")]), L(true,"p",[V("y")])]).resolution(
+        expect(Cl([L(false,"p",[V("y")]), L(true,"p",[V("y")])]).isResolvent(
             Cl([L(false,"p",[V("y")]), L(false,"l",[V("x")])]),
             Cl([L(true,"p",[V("y")]), L(true,"l",[V("x")])]),
+            new Map(),
             new Map()
         )).toBe(true);
     });
 });
 
-describe('factorisation()', () => {
+describe('isFactor()', () => {
     test('Simple', () => {
-        expect(Cl([Lp]).factorisation(Cl([Lp,Lp]), new Map())).toBe(true);
+        expect(Cl([Lp]).isFactor(Cl([Lp,Lp]), new Map())).toBe(true);
     });
 
     test('Medium', () => {
-        expect(Cl([Lp, Ll]).substitute(new Map([["y", Vz]])).factorisation(Cl([Ll,Lp,Lp]), new Map([["y", Vz]]))).toBe(true);
+        expect(Cl([Lp, Ll]).substitute(new Map([["y", Vz]])).isFactor(Cl([Ll,Lp,Lp]), new Map([["y", Vz]]))).toBe(true);
     });
 
     test('Multiple', () => {
-        expect(Cl([L(false,"l",[V("x")]), L(false,"l",[V("x")]), L(true,"p",[V("y")])]).factorisation(
+        expect(Cl([L(false,"l",[V("x")]), L(false,"l",[V("x")]), L(true,"p",[V("y")])]).isFactor(
             Cl([L(true,"p",[V("y")]), L(false,"l",[V("x")]), L(true,"p",[V("y")]), L(false,"l",[V("x")])]),
             new Map()
         )).toBe(true);
 
-        expect(Cl([L(true,"p",[V("y")]), L(true,"p",[V("y")]), L(false,"l",[V("x")])]).factorisation(
+        expect(Cl([L(true,"p",[V("y")]), L(true,"p",[V("y")]), L(false,"l",[V("x")])]).isFactor(
             Cl([L(true,"p",[V("y")]), L(false,"l",[V("x")]), L(true,"p",[V("y")]), L(false,"l",[V("x")])]),
             new Map()
         )).toBe(true);

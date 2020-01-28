@@ -67,12 +67,13 @@ class Clause extends Formula {
     return undefined;
   }
 
-  resolution(cl1, cl2, sub){
-    let newCl1 = cl1.substitute(sub);
-    let newCl2 = cl2.substitute(sub);
+  isResolvent(cl1, cl2, renaming, unifier){
+    const newCl1 = cl1.substitute(renaming).substitute(unifier);
+    const newCl2 = cl2.substitute(unifier);
     for (let lit1 of newCl1.lits){
+      const nlit1 = lit1.negation();
       for (let lit2 of newCl2.lits){
-        if (lit1.equals(lit2.negation())){
+        if (nlit1.equals(lit2)){
           if (this.equals(new Clause(newCl1.lits.filter(lit => !lit.equals(lit1))
             .concat(newCl2.lits.filter(lit => !lit.equals(lit2)))))){
             return true;
@@ -84,16 +85,15 @@ class Clause extends Formula {
     return false;
   }
 
-  factorisation(cl, sub){
-    let newCl = cl.substitute(sub);
+  isFactor(cl, unifier){
+    const newCl = cl.substitute(unifier);
     for (let i = 0; i < newCl.lits.length; i++){
-      for (let j = i+1; j < newCl.lits.length; j++){
-        if (newCl.lits[i].equals(newCl.lits[j])){
-          if (this.equals(new Clause(newCl.lits.filter(lit => !lit.equals(newCl.lits[i]))
-            .concat([newCl.lits[i]])))) {
-            return true;
+      const factor = new Clause(newCl.lits.filter((_, k) => i !== k));
+      if (this.equals(factor)) {
+        for (let j = i+1; j < newCl.lits.length; j++){
+          if (newCl.lits[i].equals(newCl.lits[j])){
+              return true;
           }
-          break;
         }
       }
     }
