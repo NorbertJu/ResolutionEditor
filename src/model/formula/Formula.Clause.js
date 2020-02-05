@@ -67,32 +67,43 @@ class Clause extends Formula {
     return undefined;
   }
 
+  * getResolvents(cl1, cl2) {
+    for (let lit1 of cl1.lits){
+      const nlit1 = lit1.negation();
+      for (let lit2 of cl2.lits){
+        if (nlit1.equals(lit2)){
+          yield new Clause(cl1.lits.filter(lit => !lit.equals(lit1))
+          .concat(cl2.lits.filter(lit => !lit.equals(lit2))));
+          break;
+        }
+      }
+    }
+  }
+
   isResolvent(cl1, cl2, renaming, unifier){
     const newCl1 = cl1.substitute(renaming).substitute(unifier);
     const newCl2 = cl2.substitute(unifier);
-    for (let lit1 of newCl1.lits){
-      const nlit1 = lit1.negation();
-      for (let lit2 of newCl2.lits){
-        if (nlit1.equals(lit2)){
-          if (this.equals(new Clause(newCl1.lits.filter(lit => !lit.equals(lit1))
-            .concat(newCl2.lits.filter(lit => !lit.equals(lit2)))))){
-            return true;
-          }
-          break;
-        }
+    for (const resolvent of this.getResolvents(newCl1, newCl2)) {
+      if (this.equals(resolvent)){
+        return true;
       }
     }
     return false;
   }
 
+  * getFactors(cl) {
+    for (let i = 0; i < cl.lits.length; i++){
+      yield [new Clause(cl.lits.filter((_, k) => i !== k)), i];
+    }
+  }
+
   isFactor(cl, unifier){
     const newCl = cl.substitute(unifier);
-    for (let i = 0; i < newCl.lits.length; i++){
-      const factor = new Clause(newCl.lits.filter((_, k) => i !== k));
+    for (const [factor, i] of this.getFactors(newCl)){
       if (this.equals(factor)) {
         for (let j = i+1; j < newCl.lits.length; j++){
           if (newCl.lits[i].equals(newCl.lits[j])){
-              return true;
+            return true;
           }
         }
       }
