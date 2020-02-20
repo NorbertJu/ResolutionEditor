@@ -1,7 +1,7 @@
 import * as model from './index'
 
 const V = name => new model.Variable(name);
-const C = (name) => new model.Constant(name);
+const C = name => new model.Constant(name);
 const F = (name, args) => new model.Function(name, args);
 const L = (neg, name, args) => new model.Literal(neg, name, args);
 const Cl = (args) => new model.Clause(args);
@@ -16,8 +16,10 @@ const Fg = F("g", [Vx, Ff]);
 const Lp = L(false, "p", [Vy, CB, Fg]);
 const Ll = L(true, "l", [Vx, CB]);
 const Lq = L(true, "q", [Vz, Vx]);
+const Lw = L(false, "q", [Vy, Vx])
 const Cl1 = Cl([Lp, Ll, Lq]);
 const Cl2 = Cl([Lq]);
+const Cl3 = Cl([Lw]);
 
 
 describe('toString()', () => {
@@ -143,4 +145,52 @@ test('Clause', () => {
     ));
     expect(Cl1.substitute(new Map([["B", Vy]]))).toStrictEqual(Cl([Lp, Ll, Lq]));
 });
+});
+
+describe('isResolvent()', () => {
+    test('Simple', () => {
+        expect(Cl([]).isResolvent(Cl2, Cl3, new Map(),new Map([["y", Vz]]))).toBe(true);
+    });
+
+    test('Medium', () => {
+        expect(Cl([Lp, Ll]).substitute(new Map([["y", Vz]])).isResolvent(Cl1, Cl3, new Map(), new Map([["y", Vz]]))).toBe(true);
+    });
+
+    test('Multiple', () => {
+        expect(Cl([L(false,"l",[V("x")]), L(true,"l",[V("x")])]).isResolvent(
+            Cl([L(false,"p",[V("y")]), L(false,"l",[V("x")])]),
+            Cl([L(true,"p",[V("y")]), L(true,"l",[V("x")])]),
+            new Map(),
+            new Map()
+        )).toBe(true);
+
+        expect(Cl([L(false,"p",[V("y")]), L(true,"p",[V("y")])]).isResolvent(
+            Cl([L(false,"p",[V("y")]), L(false,"l",[V("x")])]),
+            Cl([L(true,"p",[V("y")]), L(true,"l",[V("x")])]),
+            new Map(),
+            new Map()
+        )).toBe(true);
+    });
+});
+
+describe('isFactor()', () => {
+    test('Simple', () => {
+        expect(Cl([Lp]).isFactor(Cl([Lp,Lp]), new Map())).toBe(true);
+    });
+
+    test('Medium', () => {
+        expect(Cl([Lp, Ll]).substitute(new Map([["y", Vz]])).isFactor(Cl([Ll,Lp,Lp]), new Map([["y", Vz]]))).toBe(true);
+    });
+
+    test('Multiple', () => {
+        expect(Cl([L(false,"l",[V("x")]), L(false,"l",[V("x")]), L(true,"p",[V("y")])]).isFactor(
+            Cl([L(true,"p",[V("y")]), L(false,"l",[V("x")]), L(true,"p",[V("y")]), L(false,"l",[V("x")])]),
+            new Map()
+        )).toBe(true);
+
+        expect(Cl([L(true,"p",[V("y")]), L(true,"p",[V("y")]), L(false,"l",[V("x")])]).isFactor(
+            Cl([L(true,"p",[V("y")]), L(false,"l",[V("x")]), L(true,"p",[V("y")]), L(false,"l",[V("x")])]),
+            new Map()
+        )).toBe(true);
+    });
 });

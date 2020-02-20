@@ -4,8 +4,8 @@ import { connect } from 'react-redux'
 
 let UndoRedo = ({ canUndo, canRedo, onUndo, onRedo }) => (
   <div className="btn-group" role="group">
-    <button type="button" className="btn btn-secondary" onClick={onUndo} disabled={!canUndo}>Undo</button>
-    <button type="button" className="btn btn-secondary" onClick={onRedo} disabled={!canRedo}>Redo</button>
+    <button type="button" className="btn btn-secondary btn-sm" onClick={onUndo} disabled={!canUndo}>↶ Undo</button>
+    <button type="button" className="btn btn-secondary btn-sm" onClick={onRedo} disabled={!canRedo}>Redo ↷</button>
   </div>
 )
 
