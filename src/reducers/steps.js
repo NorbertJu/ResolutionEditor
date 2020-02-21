@@ -1,7 +1,7 @@
 import undoable, {groupByActionTypes} from 'redux-undo';
-import {ADD_STEP,CHANGE_STEP,DELETE_STEP,INSERT_STEP, STEP_UP, STEP_DOWN, CHANGE_RULE, CHANGE_PARAMS} from '../actions'
+import {ADD_STEP,CHANGE_STEP,DELETE_STEP,INSERT_STEP, STEP_UP, STEP_DOWN, CHANGE_RULE, CHANGE_PARAMS, CHANGE_CONST, CHANGE_FUN, CHANGE_PRED} from '../actions'
 
-const steps = (state = {order: [], allSteps: new Map(), rank: new Map()}, action) => {
+const steps = (state = {language: {constants: "", functions: "", predicates: ""},order: [], allSteps: new Map(), rank: new Map()}, action) => {
   switch (action.type) {
     case ADD_STEP:
       return Object.assign({}, state, {
@@ -58,6 +58,33 @@ const steps = (state = {order: [], allSteps: new Map(), rank: new Map()}, action
           }]
         ])
       }) 
+
+    case CHANGE_CONST:
+      return Object.assign({}, state, {
+        language: {
+          constants: action.text,
+          functions: state.language.functions,
+          predicates: state.language.predicates
+        }
+      })
+      
+    case CHANGE_FUN:
+      return Object.assign({}, state, {
+        language: {
+          constants: state.language.constants,
+          functions: action.text,
+          predicates: state.language.predicates
+        }
+      })
+
+    case CHANGE_PRED:
+      return Object.assign({}, state, {
+        language: {
+          constants: state.language.constants,
+          functions: state.language.functions,
+          predicates: action.text
+        }
+      })
         
     case DELETE_STEP:
       let delOrder = state.rank.get(action.id);

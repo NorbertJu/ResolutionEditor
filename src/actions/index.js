@@ -6,6 +6,9 @@ export const DELETE_STEP = 'DELETE_STEP';
 export const INSERT_STEP = 'INSERT_STEP';
 export const STEP_UP = 'STEP_UP';
 export const STEP_DOWN = 'STEP_DOWN';
+export const CHANGE_CONST = 'CHANGE_CONST';
+export const CHANGE_FUN = 'CHANGE_FUN';
+export const CHANGE_PRED = 'CHANGE_PRED';
 
 let nextStepId = 0
 
@@ -23,6 +26,21 @@ export const changeStep = (id, text) => ({
 export const changeRule = (id, text) => ({
   type: CHANGE_RULE,
   id,
+  text
+})
+
+export const changeConst = (text) => ({
+  type: CHANGE_CONST,
+  text
+})
+
+export const changeFun = (text) => ({
+  type: CHANGE_FUN,
+  text
+})
+
+export const changePred = (text) => ({
+  type: CHANGE_PRED,
   text
 })
 
