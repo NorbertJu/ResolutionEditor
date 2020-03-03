@@ -67,23 +67,23 @@ class Clause extends Formula {
     return undefined;
   }
 
-  * getResolvents(cl1, cl2) {
-    for (let lit1 of cl1.lits){
+  * getResolvents(cl2, renaming, unifier) {
+    const newCl1 = this.substitute(renaming).substitute(unifier);
+    const newCl2 = cl2.substitute(unifier);
+    for (let lit1 of newCl1.lits){
       const nlit1 = lit1.negation();
-      for (let lit2 of cl2.lits){
+      for (let lit2 of newCl2.lits){
         if (nlit1.equals(lit2)){
-          yield new Clause(cl1.lits.filter(lit => !lit.equals(lit1))
-          .concat(cl2.lits.filter(lit => !lit.equals(lit2))));
+          yield new Clause(newCl1.lits.filter(lit => !lit.equals(lit1))
+          .concat(newCl2.lits.filter(lit => !lit.equals(lit2))));
           break;
         }
       }
     }
   }
 
-  isResolvent(cl1, cl2, renaming, unifier){
-    const newCl1 = cl1.substitute(renaming).substitute(unifier);
-    const newCl2 = cl2.substitute(unifier);
-    for (const resolvent of this.getResolvents(newCl1, newCl2)) {
+  isResolventOf(cl1, cl2, renaming, unifier){
+    for (const resolvent of cl1.getResolvents(cl2, renaming, unifier)) {
       if (this.equals(resolvent)){
         return true;
       }
@@ -91,21 +91,19 @@ class Clause extends Formula {
     return false;
   }
 
-  * getFactors(cl) {
-    for (let i = 0; i < cl.lits.length; i++){
-      yield [new Clause(cl.lits.filter((_, k) => i !== k)), i];
+  * getFactors(unifier) {
+    const lm = this.substitute(unifier).getLitsMultiset();
+    for (let [lit, n] of lm) {
+      if (n >= 2) {
+        yield new Clause(lm.flatMap(([lit1, n1]) => new Array(lit1 == lit ? n1 - 1 : n1).fill(lit1)));
+      }
     }
   }
 
-  isFactor(cl, unifier){
-    const newCl = cl.substitute(unifier);
-    for (const [factor, i] of this.getFactors(newCl)){
+  isFactorOf(cl, unifier){
+    for (const factor of cl.getFactors(unifier)){
       if (this.equals(factor)) {
-        for (let j = i+1; j < newCl.lits.length; j++){
-          if (newCl.lits[i].equals(newCl.lits[j])){
-            return true;
-          }
-        }
+        return true;
       }
     }
     return false;
