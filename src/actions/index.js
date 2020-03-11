@@ -31,21 +31,6 @@ export const changeRule = (id, text) => ({
   text
 })
 
-export const changeConst = (text) => ({
-  type: CHANGE_CONST,
-  text
-})
-
-export const changeFun = (text) => ({
-  type: CHANGE_FUN,
-  text
-})
-
-export const changePred = (text) => ({
-  type: CHANGE_PRED,
-  text
-})
-
 export const changeUnifier = (id, text) => ({
   type: CHANGE_UNIFIER,
   id,
