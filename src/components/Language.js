@@ -2,28 +2,6 @@ import React, {useState} from 'react'
 import ErrorMsg from './ErrorMsg'
 import {parseConstants, parseFunctions, parsePredicates} from '@fmfi-uk-1-ain-412/js-fol-parser'
 
-function debounce(func, wait, immediate) {
-    var timeout;
-  
-    return function executedFunction() {
-      var context = this;
-      var args = arguments;
-          
-      var later = function() {
-        timeout = null;
-        if (!immediate) func.apply(context, args);
-      };
-  
-      var callNow = immediate && !timeout;
-      
-      clearTimeout(timeout);
-  
-      timeout = setTimeout(later, wait);
-      
-      if (callNow) func.apply(context, args);
-    };
-  };
-
 const Language = ({steps, onConstChange, onFunChange, onPredChange, constInput, funInput, predInput}) => {
     let[constError, setConstError] = useState(undefined);
     let[funError, setFunError] = useState(undefined);
@@ -38,9 +16,6 @@ const Language = ({steps, onConstChange, onFunChange, onPredChange, constInput, 
             <input type="text" className="form-control" name="constants"
             onChange={e => {
                 onConstChange(e.target.value);
-                debounce((e) => {
-                    console.log(e);
-                }, 0)
                 try { constInput = e.target; 
                     if (constInput.value !== "") parseConstants(e.target.value); 
                     setConstError(undefined); 
