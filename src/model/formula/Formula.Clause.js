@@ -50,7 +50,7 @@ class Clause extends Formula {
   }
   
   has(key){
-    for (let tuple of this.getLitsMultiset()) {
+    for (const tuple of this.getLitsMultiset()) {
       if (tuple[0].equals(key)){
         return true;
       }
@@ -59,7 +59,7 @@ class Clause extends Formula {
   }
 
   get(key){
-    for (let tuple of this.getLitsMultiset()) {
+    for (const tuple of this.getLitsMultiset()) {
       if (tuple[0].equals(key)){
         return tuple[1];
       }
@@ -68,14 +68,14 @@ class Clause extends Formula {
   }
 
   * getResolvents(cl2, renaming, unifier) {
-    const newCl1 = this.substitute(renaming).substitute(unifier);
-    const newCl2 = cl2.substitute(unifier);
-    for (let lit1 of newCl1.lits){
+    const lm1 = this.substitute(renaming).substitute(unifier).getLitsMultiset();
+    const lm2 = cl2.substitute(unifier).getLitsMultiset();
+    for (const [lit1, _] of lm1){
       const nlit1 = lit1.negation();
-      for (let lit2 of newCl2.lits){
+      for (const [lit2, _] of lm2){
         if (nlit1.equals(lit2)){
-          yield new Clause(newCl1.lits.filter(lit => !lit.equals(lit1))
-          .concat(newCl2.lits.filter(lit => !lit.equals(lit2))));
+          yield new Clause(lm1.flatMap(([l1, n1]) => new Array(lit1 == l1 ? n1 - 1 : n1).fill(l1))
+          .concat(lm2.flatMap(([l2, n2]) => new Array(lit2 == l2 ? n2 - 1 : n2).fill(l2))));
           break;
         }
       }
@@ -93,7 +93,7 @@ class Clause extends Formula {
 
   * getFactors(unifier) {
     const lm = this.substitute(unifier).getLitsMultiset();
-    for (let [lit, n] of lm) {
+    for (const [lit, n] of lm) {
       if (n >= 2) {
         yield new Clause(lm.flatMap(([lit1, n1]) => new Array(lit1 == lit ? n1 - 1 : n1).fill(lit1)));
       }
