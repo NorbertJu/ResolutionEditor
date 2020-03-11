@@ -147,24 +147,24 @@ test('Clause', () => {
 });
 });
 
-describe('isResolvent()', () => {
+describe('isResolventOf()', () => {
     test('Simple', () => {
-        expect(Cl([]).isResolvent(Cl2, Cl3, new Map(),new Map([["y", Vz]]))).toBe(true);
+        expect(Cl([]).isResolventOf(Cl2, Cl3, new Map(),new Map([["y", Vz]]))).toBe(true);
     });
 
     test('Medium', () => {
-        expect(Cl([Lp, Ll]).substitute(new Map([["y", Vz]])).isResolvent(Cl1, Cl3, new Map(), new Map([["y", Vz]]))).toBe(true);
+        expect(Cl([Lp, Ll]).substitute(new Map([["y", Vz]])).isResolventOf(Cl1, Cl3, new Map(), new Map([["y", Vz]]))).toBe(true);
     });
 
     test('Multiple', () => {
-        expect(Cl([L(false,"l",[V("x")]), L(true,"l",[V("x")])]).isResolvent(
+        expect(Cl([L(false,"l",[V("x")]), L(true,"l",[V("x")])]).isResolventOf(
             Cl([L(false,"p",[V("y")]), L(false,"l",[V("x")])]),
             Cl([L(true,"p",[V("y")]), L(true,"l",[V("x")])]),
             new Map(),
             new Map()
         )).toBe(true);
 
-        expect(Cl([L(false,"p",[V("y")]), L(true,"p",[V("y")])]).isResolvent(
+        expect(Cl([L(false,"p",[V("y")]), L(true,"p",[V("y")])]).isResolventOf(
             Cl([L(false,"p",[V("y")]), L(false,"l",[V("x")])]),
             Cl([L(true,"p",[V("y")]), L(true,"l",[V("x")])]),
             new Map(),
@@ -173,22 +173,22 @@ describe('isResolvent()', () => {
     });
 });
 
-describe('isFactor()', () => {
+describe('isFactorOf()', () => {
     test('Simple', () => {
-        expect(Cl([Lp]).isFactor(Cl([Lp,Lp]), new Map())).toBe(true);
+        expect(Cl([Lp]).isFactorOf(Cl([Lp,Lp]), new Map())).toBe(true);
     });
 
     test('Medium', () => {
-        expect(Cl([Lp, Ll]).substitute(new Map([["y", Vz]])).isFactor(Cl([Ll,Lp,Lp]), new Map([["y", Vz]]))).toBe(true);
+        expect(Cl([Lp, Ll]).substitute(new Map([["y", Vz]])).isFactorOf(Cl([Ll,Lp,Lp]), new Map([["y", Vz]]))).toBe(true);
     });
 
     test('Multiple', () => {
-        expect(Cl([L(false,"l",[V("x")]), L(false,"l",[V("x")]), L(true,"p",[V("y")])]).isFactor(
+        expect(Cl([L(false,"l",[V("x")]), L(false,"l",[V("x")]), L(true,"p",[V("y")])]).isFactorOf(
             Cl([L(true,"p",[V("y")]), L(false,"l",[V("x")]), L(true,"p",[V("y")]), L(false,"l",[V("x")])]),
             new Map()
         )).toBe(true);
 
-        expect(Cl([L(true,"p",[V("y")]), L(true,"p",[V("y")]), L(false,"l",[V("x")])]).isFactor(
+        expect(Cl([L(true,"p",[V("y")]), L(true,"p",[V("y")]), L(false,"l",[V("x")])]).isFactorOf(
             Cl([L(true,"p",[V("y")]), L(false,"l",[V("x")]), L(true,"p",[V("y")]), L(false,"l",[V("x")])]),
             new Map()
         )).toBe(true);
