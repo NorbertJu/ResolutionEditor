@@ -10,6 +10,7 @@ const Proof = ({ steps, onStepDelete, onStepChange, onStepInsert, onStepUp, onSt
         key={id}
         {...steps.allSteps.get(id)} 
         index={index+1}
+        state={steps}
         onChange={(value) => onStepChange(id, value)}
         onRule={(value) => onRuleChange(id, value)}
         onRenaming={(value) => onRenaming(id, value)}
