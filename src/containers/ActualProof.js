@@ -1,5 +1,5 @@
 import { connect } from 'react-redux'
-import { deleteStep, changeStep, insertStep, moveStepDown, moveStepUp, changeRule, changeParams } from '../actions'
+import { deleteStep, changeStep, insertStep, moveStepDown, moveStepUp, changeRule, changeReference, changeRenaming, changeUnifier } from '../actions'
 import Proof from '../components/Proof'
 
 const mapStateToProps = (state) => ({
@@ -10,7 +10,9 @@ const mapDispatchToProps = ({
   onStepDelete: deleteStep,
   onStepChange: changeStep,
   onRuleChange: changeRule,
-  onParamsChange: changeParams,
+  onRenaming: changeRenaming,
+  onUnifier: changeUnifier,
+  onReference: changeReference,
   onStepInsert: insertStep,
   onStepUp: moveStepUp,
   onStepDown: moveStepDown  
