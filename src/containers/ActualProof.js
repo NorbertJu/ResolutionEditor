@@ -3,7 +3,7 @@ import { deleteStep, changeStep, insertStep, moveStepDown, moveStepUp, changeRul
 import Proof from '../components/Proof'
 
 const mapStateToProps = (state) => ({
-  steps: state.steps.present
+  steps: state.present.steps
 })
 
 const mapDispatchToProps = ({

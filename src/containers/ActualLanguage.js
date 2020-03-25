@@ -3,7 +3,7 @@ import { changeConst, changeFun, changePred } from '../actions'
 import Language from '../components/Language'
 
 const mapStateToProps = (state) => ({
-  steps: state.steps.present
+  language: state.present.language
 })
 
 const mapDispatchToProps = ({

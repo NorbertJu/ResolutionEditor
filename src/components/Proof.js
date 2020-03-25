@@ -8,7 +8,7 @@ const Proof = ({ steps, onStepDelete, onStepChange, onStepInsert, onStepUp, onSt
     {steps.order.map((id, index) =>
       <Step
         key={id}
-        {...steps.allSteps.get(id)} 
+        step = {steps.allSteps.get(id)} 
         index={index+1}
         state={steps}
         onChange={(value) => onStepChange(id, value)}

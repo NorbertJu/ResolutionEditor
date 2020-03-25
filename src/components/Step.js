@@ -1,9 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import {parseConstants, parseFunctions, parsePredicates, parseClause} from '@fmfi-uk-1-ain-412/js-fol-parser';
-import {Constant, Variable, Function, Clause, Literal} from '../model/index'
 
-const Step = ({ index, state, formula, rule, renaming, unifier, reference, onChange ,onDelete, onInsert, onUp, onDown, onRule, onRenaming, onUnifier, onReference }) => (
+const Step = ({ index, step, onChange ,onDelete, onInsert, onUp, onDown, onRule, onRenaming, onUnifier, onReference }) => (
   <div>
   <button type="button" className="btn btn-light btn-sm" onClick={onInsert} style={{float:"right"}}> + </button>
   
@@ -11,14 +9,13 @@ const Step = ({ index, state, formula, rule, renaming, unifier, reference, onCha
     <div className="input-group-prepend">
       <span className="input-group-text">{index}</span>
     </div>
-    <input type="text" className="form-control" name="item" 
-      onChange={e => {
-        onChange(e.target.value);
-        const input = e.target;
+    <input type="text" className={`form-control ${step.formula.error ? "is-invalid" : ""}`} name="item" 
+      onChange={e => {onChange(e.target.value);
+        /*
         try {
-        const constants = parseConstants(state.language.constants);
-        const functions = parseFunctions(state.language.functions);
-        const predicates = parsePredicates(state.language.predicates);
+        const constants = "";
+        const functions = "";
+        const predicates = "";
         const nonLogicalSymbols = new Set([...constants, ...functions.keys(), ...predicates.keys()]);
         console.log();
         const language = {
@@ -63,32 +60,33 @@ const Step = ({ index, state, formula, rule, renaming, unifier, reference, onCha
           e.name + ": " + e.message;
           input.classList.add("is-invalid");
         }
+        */
       }}
-      value={formula}
+      value={step.formula.input}
     />
     <div className="input-group-append">
-      <select className="form-control" onChange={e => onRule(e.target.value)} value={rule}>
+      <select className="form-control" onChange={e => onRule(e.target.value)} value={step.rule}>
         <option>Premise</option>
         <option>Resolution</option>
         <option>Factoring</option>
       </select>
       {
-        (rule === "Resolution") && 
-        <input type="text" placeholder="Renaming" className="form-control" name="renaming" onChange={e => onRenaming(e.target.value)} value={renaming}/>
+        (step.rule === "Resolution") && 
+        <input type="text" placeholder="Renaming" className="form-control" name="renaming" onChange={e => onRenaming(e.target.value)} value={step.renaming.input}/>
       }
       {
-        (rule === "Resolution" || rule === "Factoring") && 
-        <input type="text" placeholder="Unifier" className="form-control" name="unifier" onChange={e => onUnifier(e.target.value)} value={unifier}/>
+        (step.rule === "Resolution" || step.rule === "Factoring") && 
+        <input type="text" placeholder="Unifier" className="form-control" name="unifier" onChange={e => onUnifier(e.target.value)} value={step.unifier.input}/>
       }
       {
-        (rule === "Resolution" || rule === "Factoring") &&
-        <input type="text" placeholder="Reference" className="form-control w-50" name="reference" onChange={e => onReference(e.target.value)} value={reference}/>
+        (step.rule === "Resolution" || step.rule === "Factoring") &&
+        <input type="text" placeholder="Reference" className="form-control w-50" name="reference" onChange={e => onReference(e.target.value)} value={step.reference.input}/>
       }
       <button type="button" className="btn btn-outline-secondary btn-sm" onClick={onUp} disabled={onUp===null}> ↑ </button>
       <button type="button" className="btn btn-outline-secondary btn-sm" onClick={onDown} disabled={onDown===null}> ↓ </button>
       <button className="btn btn-outline-danger" type="button" onClick={onDelete} >X</button>
     </div>
-    <div className="invalid-feedback pr-1 pl-1" id={"premiseError-"+index}></div>
+    <div className="invalid-feedback pr-1 pl-1" dangerouslySetInnerHTML={{__html: step.formula.error}}></div>
   </div>
   </div>
 )
@@ -97,9 +95,7 @@ Step.propTypes = {
   index: PropTypes.number.isRequired,
   onChange: PropTypes.func.isRequired,
   onDelete: PropTypes.func.isRequired,
-  onInsert: PropTypes.func.isRequired,
-  formula: PropTypes.string.isRequired,
-  rule: PropTypes.string.isRequired
+  onInsert: PropTypes.func.isRequired
 }
 
 export default Step

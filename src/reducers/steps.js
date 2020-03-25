@@ -1,7 +1,8 @@
-import undoable, { groupByActionTypes } from 'redux-undo';
 import { ADD_STEP, CHANGE_STEP, DELETE_STEP, INSERT_STEP, STEP_UP, STEP_DOWN, CHANGE_RULE, CHANGE_RENAMING, CHANGE_REFERENCE, CHANGE_UNIFIER, CHANGE_CONST, CHANGE_FUN, CHANGE_PRED } from '../actions'
+import { parseClause } from '@fmfi-uk-1-ain-412/js-fol-parser';
+import { Variable, Constant, Function, Literal, Clause } from '../model/index'
 
-const steps = (state = { language: { constants: "", functions: "", predicates: "" }, order: [], allSteps: new Map(), rank: new Map() }, action) => {
+const steps = (state = { order: [], allSteps: new Map(), rank: new Map() }, action = { type: undefined }, language) => {
   switch (action.type) {
     case ADD_STEP:
       return Object.assign({}, state, {
@@ -12,11 +13,27 @@ const steps = (state = { language: { constants: "", functions: "", predicates: "
         allSteps: new Map([
           ...state.allSteps,
           [action.id, {
-            formula: "",
+            formula: {
+              input: "",
+              object: undefined,
+              error: ""
+            },
             rule: "",
-            renaming: "",
-            unifier: "",
-            reference: ""
+            renaming: {
+              input: "",
+              object: undefined,
+              error: ""
+            },
+            unifier: {
+              input: "",
+              object: undefined,
+              error: ""
+            },
+            reference: {
+              input: "",
+              object: undefined,
+              error: ""
+            }
           }]
         ]),
         rank: new Map([
@@ -26,18 +43,69 @@ const steps = (state = { language: { constants: "", functions: "", predicates: "
       })
 
     case CHANGE_STEP:
-      return Object.assign({}, state, {
+      let newState = {
         allSteps: new Map([
           ...state.allSteps,
           [action.id, {
-            formula: action.text,
+            formula: {
+              input: action.text,
+              object: state.allSteps.get(action.id).formula.object,
+              error: state.allSteps.get(action.id).formula.error
+            },
             rule: state.allSteps.get(action.id).rule,
             renaming: state.allSteps.get(action.id).renaming,
             unifier: state.allSteps.get(action.id).unifier,
             reference: state.allSteps.get(action.id).reference
           }]
-        ])
-      })
+        ]),
+        order: state.order,
+        rank: state.rank
+      }
+      try {
+        const nonLogicalSymbols = new Set([...language.const.object, ...language.fun.object.keys(), ...language.pred.object.keys()]);
+        const languageSymbols = {
+          isConstant: (symbol) =>
+            language.const.object.has(symbol),
+          isFunction: (symbol) =>
+            language.fun.object.has(symbol),
+          isPredicate: (symbol) =>
+            language.pred.object.has(symbol),
+          isVariable: (symbol) =>
+            !nonLogicalSymbols.has(symbol),
+        }
+        function checkArity(symbol, args, arityMap, { expected }) {
+          const a = arityMap.get(symbol);
+          if (args.length !== a) {
+            expected(`${a} argument${(a == 1 ? '' : 's')} to ${symbol}`);
+          }
+        }
+        const factories = {
+          variable: (symbol, _) =>
+            new Variable(symbol),
+          constant: (symbol, _) =>
+            new Constant(symbol),
+          functionApplication: (funSymbol, args, ee) => {
+            checkArity(funSymbol, args, language.fun.object, ee);
+            return new Function(funSymbol, args);
+          },
+          literal: (negated, predSymbol, args, ee) => {
+            checkArity(predSymbol, args, language.pred.object, ee);
+            return new Literal(negated, predSymbol, args);
+          },
+          clause: (literals, _) =>
+            new Clause(literals)
+        }
+        if (action.text !== "") {
+          parseClause(action.text, languageSymbols, factories);
+        }
+        newState.allSteps.get(action.id).formula.error = "";
+      } catch (e) {
+        newState.allSteps.get(action.id).formula.error = "<b>" + action.text.substring(0, e.location.start.offset) + "<mark class='text-danger'>" +
+          action.text.substring(e.location.start.offset, e.location.end.offset) + "</mark>" +
+          action.text.substring(e.location.end.offset, action.text.length) + "</b><br/>" +
+          e.name + ": " + e.message;
+      }
+      return newState
 
     case CHANGE_RULE:
       return Object.assign({}, state, {
@@ -60,7 +128,11 @@ const steps = (state = { language: { constants: "", functions: "", predicates: "
           [action.id, {
             formula: state.allSteps.get(action.id).formula,
             rule: state.allSteps.get(action.id).rule,
-            renaming: action.text,
+            renaming: {
+              input: action.text,
+              object: state.allSteps.get(action.id).renaming.object,
+              error: state.allSteps.get(action.id).renaming.error
+            },
             unifier: state.allSteps.get(action.id).unifier,
             reference: state.allSteps.get(action.id).reference
           }]
@@ -75,7 +147,11 @@ const steps = (state = { language: { constants: "", functions: "", predicates: "
             formula: state.allSteps.get(action.id).formula,
             rule: state.allSteps.get(action.id).rule,
             renaming: state.allSteps.get(action.id).renaming,
-            unifier: action.text,
+            unifier: {
+              input: action.text,
+              object: state.allSteps.get(action.id).unifier.object,
+              error: state.allSteps.get(action.id).unifier.error
+            },
             reference: state.allSteps.get(action.id).reference
           }]
         ])
@@ -90,36 +166,13 @@ const steps = (state = { language: { constants: "", functions: "", predicates: "
             rule: state.allSteps.get(action.id).rule,
             renaming: state.allSteps.get(action.id).renaming,
             unifier: state.allSteps.get(action.id).unifier,
-            reference: action.text
+            reference: {
+              input: action.text,
+              object: state.allSteps.get(action.id).reference.object,
+              error: state.allSteps.get(action.id).reference.error
+            }
           }]
         ])
-      })
-
-    case CHANGE_CONST:
-      return Object.assign({}, state, {
-        language: {
-          constants: action.text,
-          functions: state.language.functions,
-          predicates: state.language.predicates
-        }
-      })
-
-    case CHANGE_FUN:
-      return Object.assign({}, state, {
-        language: {
-          constants: state.language.constants,
-          functions: action.text,
-          predicates: state.language.predicates
-        }
-      })
-
-    case CHANGE_PRED:
-      return Object.assign({}, state, {
-        language: {
-          constants: state.language.constants,
-          functions: state.language.functions,
-          predicates: action.text
-        }
       })
 
     case DELETE_STEP:
@@ -151,11 +204,27 @@ const steps = (state = { language: { constants: "", functions: "", predicates: "
         allSteps: new Map([
           ...state.allSteps,
           [action.id, {
-            formula: "",
+            formula: {
+              input: "",
+              object: undefined,
+              error: ""
+            },
             rule: "",
-            renaming: "",
-            unifier: "",
-            reference: ""
+            renaming: {
+              input: "",
+              object: undefined,
+              error: ""
+            },
+            unifier: {
+              input: "",
+              object: undefined,
+              error: ""
+            },
+            reference: {
+              input: "",
+              object: undefined,
+              error: ""
+            }
           }]
         ]),
         rank: new Map([
@@ -197,8 +266,4 @@ const steps = (state = { language: { constants: "", functions: "", predicates: "
   }
 }
 
-const undoableSteps = undoable(steps, {
-  groupBy: groupByActionTypes([CHANGE_STEP]),
-})
-
-export default undoableSteps
+export default steps;
