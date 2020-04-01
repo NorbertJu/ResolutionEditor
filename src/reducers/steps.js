@@ -61,50 +61,7 @@ const steps = (state = { order: [], allSteps: new Map(), rank: new Map() }, acti
         order: state.order,
         rank: state.rank
       }
-      try {
-        const nonLogicalSymbols = new Set([...language.const.object, ...language.fun.object.keys(), ...language.pred.object.keys()]);
-        const languageSymbols = {
-          isConstant: (symbol) =>
-            language.const.object.has(symbol),
-          isFunction: (symbol) =>
-            language.fun.object.has(symbol),
-          isPredicate: (symbol) =>
-            language.pred.object.has(symbol),
-          isVariable: (symbol) =>
-            !nonLogicalSymbols.has(symbol),
-        }
-        function checkArity(symbol, args, arityMap, { expected }) {
-          const a = arityMap.get(symbol);
-          if (args.length !== a) {
-            expected(`${a} argument${(a == 1 ? '' : 's')} to ${symbol}`);
-          }
-        }
-        const factories = {
-          variable: (symbol, _) =>
-            new Variable(symbol),
-          constant: (symbol, _) =>
-            new Constant(symbol),
-          functionApplication: (funSymbol, args, ee) => {
-            checkArity(funSymbol, args, language.fun.object, ee);
-            return new Function(funSymbol, args);
-          },
-          literal: (negated, predSymbol, args, ee) => {
-            checkArity(predSymbol, args, language.pred.object, ee);
-            return new Literal(negated, predSymbol, args);
-          },
-          clause: (literals, _) =>
-            new Clause(literals)
-        }
-        if (action.text !== "") {
-          parseClause(action.text, languageSymbols, factories);
-        }
-        newState.allSteps.get(action.id).formula.error = "";
-      } catch (e) {
-        newState.allSteps.get(action.id).formula.error = "<b>" + action.text.substring(0, e.location.start.offset) + "<mark class='text-danger'>" +
-          action.text.substring(e.location.start.offset, e.location.end.offset) + "</mark>" +
-          action.text.substring(e.location.end.offset, action.text.length) + "</b><br/>" +
-          e.name + ": " + e.message;
-      }
+      newState.allSteps.get(action.id).formula.error = checkClause(language, action.text);
       return newState
 
     case CHANGE_RULE:
@@ -261,8 +218,62 @@ const steps = (state = { order: [], allSteps: new Map(), rank: new Map() }, acti
         rank: newRank
       })
 
+    case CHANGE_CONST:
+    case CHANGE_FUN:
+    case CHANGE_PRED: {
+      let newState = {...state}
+      newState.allSteps.forEach(function (value, key, map) {
+        newState.allSteps.get(key).formula.error = checkClause(language, value.formula.input);
+      })
+      return newState  
+    }
+
     default:
       return state
+  }
+}
+
+function checkClause(language, input) {
+  try {
+    const nonLogicalSymbols = new Set([...language.const.object, ...language.fun.object.keys(), ...language.pred.object.keys()]);
+    const languageSymbols = {
+      isConstant: (symbol) =>
+        language.const.object.has(symbol),
+      isFunction: (symbol) =>
+        language.fun.object.has(symbol),
+      isPredicate: (symbol) =>
+        language.pred.object.has(symbol),
+      isVariable: (symbol) =>
+        !nonLogicalSymbols.has(symbol),
+    }
+    function checkArity(symbol, args, arityMap, { expected }) {
+      const a = arityMap.get(symbol);
+      if (args.length !== a) {
+        expected(`${a} argument${(a == 1 ? '' : 's')} to ${symbol}`);
+      }
+    }
+    const factories = {
+      variable: (symbol, _) =>
+        new Variable(symbol),
+      constant: (symbol, _) =>
+        new Constant(symbol),
+      functionApplication: (funSymbol, args, ee) => {
+        checkArity(funSymbol, args, language.fun.object, ee);
+        return new Function(funSymbol, args);
+      },
+      literal: (negated, predSymbol, args, ee) => {
+        checkArity(predSymbol, args, language.pred.object, ee);
+        return new Literal(negated, predSymbol, args);
+      },
+      clause: (literals, _) =>
+        new Clause(literals)
+    }
+    if (input !== "") {
+      parseClause(input, languageSymbols, factories);
+    }
+    return "";
+  } catch (e) {
+    return e;
   }
 }
 

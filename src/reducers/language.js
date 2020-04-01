@@ -21,10 +21,7 @@ const language = (state = { const: { input: "", object: new Set(), error: ""}, f
                 newState.const.object = new Set(res);
                 newState.const.error = "";
             } catch (e) {
-                newState.const.error = "<b>" + action.text.substring(0, e.location.start.offset) + "<mark class='text-danger'>" +
-                action.text.substring(e.location.start.offset, e.location.end.offset) + "</mark>" +
-                action.text.substring(e.location.end.offset, action.text.length) + "</b><br/>" +
-                e.name + ": " + e.message;
+                newState.const.error = e;
             }
             return newState;
 
@@ -47,10 +44,7 @@ const language = (state = { const: { input: "", object: new Set(), error: ""}, f
                 newState.fun.object = new Map(res);
                 newState.fun.error = "";
             } catch (e) {
-                newState.fun.error = "<b>" + action.text.substring(0, e.location.start.offset) + "<mark class='text-danger'>" +
-                action.text.substring(e.location.start.offset, e.location.end.offset) + "</mark>" +
-                action.text.substring(e.location.end.offset, action.text.length) + "</b><br/>" +
-                e.name + ": " + e.message;
+                newState.fun.error = e;
             }
             return newState;
 
@@ -73,10 +67,7 @@ const language = (state = { const: { input: "", object: new Set(), error: ""}, f
                 newState.pred.object = new Map(res);
                 newState.pred.error = "";
             } catch (e) {
-                newState.pred.error = "<b>" + action.text.substring(0, e.location.start.offset) + "<mark class='text-danger'>" +
-                action.text.substring(e.location.start.offset, e.location.end.offset) + "</mark>" +
-                action.text.substring(e.location.end.offset, action.text.length) + "</b><br/>" +
-                e.name + ": " + e.message;
+                newState.pred.error = e;
             }
             return newState;
 

@@ -11,8 +11,13 @@ export const STEP_DOWN = 'STEP_DOWN';
 export const CHANGE_CONST = 'CHANGE_CONST';
 export const CHANGE_FUN = 'CHANGE_FUN';
 export const CHANGE_PRED = 'CHANGE_PRED';
+export const EMPTY_ACTION = 'EMPTY_ACTION';
 
 let nextStepId = 0;
+
+export const emptyAction = () => ({
+  type: EMPTY_ACTION
+})
 
 export const addStep = () => ({
   type: ADD_STEP,

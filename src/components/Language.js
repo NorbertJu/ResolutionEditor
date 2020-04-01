@@ -1,4 +1,5 @@
 import React from 'react'
+import ErrorMsg from '../components/ErrorMsg'
 
 const Language = ({language, onConstChange, onFunChange, onPredChange}) => {
     return (
@@ -11,7 +12,7 @@ const Language = ({language, onConstChange, onFunChange, onPredChange}) => {
             <input type="text" className={`form-control ${language.const.error ? "is-invalid" : ""}`} name="constants"
             onChange={e => onConstChange(e.target.value)}
             value={language.const.input}/>
-            <div className="invalid-feedback pr-1 pl-1" id="constError" dangerouslySetInnerHTML={{__html: language.const.error}}></div>
+            <ErrorMsg error={language.const.error} input={language.const.input} />
         </div>
         
         <div className="input-group mb-3">
@@ -21,7 +22,7 @@ const Language = ({language, onConstChange, onFunChange, onPredChange}) => {
             <input type="text" className={`form-control ${language.fun.error ? "is-invalid" : ""}`} name="functions" 
             onChange={e => onFunChange(e.target.value)} 
             value={language.fun.input}/>
-            <div className="invalid-feedback pr-1 pl-1" id="funError" dangerouslySetInnerHTML={{__html: language.fun.error}}></div>
+            <ErrorMsg error={language.fun.error} input={language.fun.input} />
         </div>
         <div className="input-group mb-3">
             <div className="input-group-prepend">
@@ -30,7 +31,7 @@ const Language = ({language, onConstChange, onFunChange, onPredChange}) => {
             <input type="text" className={`form-control ${language.pred.error ? "is-invalid" : ""}`} name="predicates" 
             onChange={e => onPredChange(e.target.value)} 
             value={language.pred.input}/>
-            <div className="invalid-feedback pr-1 pl-1" id="predError" dangerouslySetInnerHTML={{__html: language.pred.error}}></div>
+            <ErrorMsg error={language.pred.error} input={language.pred.input} />
         </div>
 
     </div>

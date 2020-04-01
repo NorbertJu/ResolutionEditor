@@ -2,7 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import Step from './Step'
 
-const Proof = ({ steps, onStepDelete, onStepChange, onStepInsert, onStepUp, onStepDown, onRuleChange, onRenaming, onUnifier, onReference}) => (
+const Proof = ({ steps, onStepDelete, onStepChange, onStepInsert, onStepUp, onStepDown, onRuleChange, onRenaming, onUnifier, onReference, clearAction}) => (
   <div style={{margin:'20px 0px'}}>
     <h2>Proof</h2>
     {steps.order.map((id, index) =>
@@ -20,6 +20,7 @@ const Proof = ({ steps, onStepDelete, onStepChange, onStepInsert, onStepUp, onSt
         onInsert={() => onStepInsert(index)}
         onUp={index === 0 ? null : () => onStepUp(index)}
         onDown={index === steps.order.length-1 ? null : () => onStepDown(index)}
+        onBlur = {() => clearAction()}
       />
     )}
   </div>
@@ -36,7 +37,8 @@ Proof.propTypes = {
   onRuleChange: PropTypes.func.isRequired,
   onStepInsert: PropTypes.func.isRequired,
   onStepUp: PropTypes.func.isRequired,
-  onStepDown: PropTypes.func.isRequired
+  onStepDown: PropTypes.func.isRequired,
+  clearAction: PropTypes.func.isRequired
 }
 
 export default Proof
