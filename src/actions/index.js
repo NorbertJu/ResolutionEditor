@@ -3,7 +3,8 @@ export const CHANGE_STEP = 'CHANGE_STEP';
 export const CHANGE_RULE = 'CHANGE_RULE';
 export const CHANGE_UNIFIER = 'CHANGE_UNIFIER';
 export const CHANGE_RENAMING = 'CHANGE_RENAMING';
-export const CHANGE_REFERENCE = 'CHANGE_REFERENCE';
+export const CHANGE_REFERENCE1 = 'CHANGE_REFERENCE1';
+export const CHANGE_REFERENCE2 = 'CHANGE_REFERENCE2';
 export const DELETE_STEP = 'DELETE_STEP';
 export const INSERT_STEP = 'INSERT_STEP';
 export const STEP_UP = 'STEP_UP';
@@ -48,8 +49,14 @@ export const changeRenaming = (id, text) => ({
   text
 })
 
-export const changeReference = (id, text) => ({
-  type: CHANGE_REFERENCE,
+export const changeReference1 = (id, text) => ({
+  type: CHANGE_REFERENCE1,
+  id,
+  text
+})
+
+export const changeReference2 = (id, text) => ({
+  type: CHANGE_REFERENCE2,
   id,
   text
 })

@@ -1,7 +1,7 @@
 import { CHANGE_CONST, CHANGE_FUN, CHANGE_PRED } from '../actions';
 import {parseConstants, parseFunctions, parsePredicates} from '@fmfi-uk-1-ain-412/js-fol-parser';
 
-const language = (state = { const: { input: "", object: new Set(), error: ""}, fun: { input: "", object: new Map(), error: "" }, pred: { input: "", object: new Map(), error: "" } }, action = {type: undefined}) => {
+const language = (state = { const: { input: "", object: new Set(), error: ""}, fun: { input: "", object: new Map(), error: "" }, pred: { input: "", object: new Map(), error: "" }, factories: {} }, action = {type: undefined}) => {
     switch (action.type) {
         case CHANGE_CONST:
             let newState = {
