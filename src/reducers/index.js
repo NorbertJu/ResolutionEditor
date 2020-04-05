@@ -1,5 +1,5 @@
 import undoable, { groupByActionTypes } from 'redux-undo';
-import { ADD_STEP, CHANGE_STEP, DELETE_STEP, INSERT_STEP, STEP_UP, STEP_DOWN, CHANGE_RULE, CHANGE_RENAMING, CHANGE_REFERENCE, CHANGE_UNIFIER, CHANGE_CONST, CHANGE_FUN, CHANGE_PRED, EMPTY_ACTION } from '../actions'
+import { ADD_STEP, CHANGE_STEP, DELETE_STEP, INSERT_STEP, STEP_UP, STEP_DOWN, CHANGE_RULE, CHANGE_RENAMING, CHANGE_REFERENCE1, CHANGE_REFERENCE2, CHANGE_UNIFIER, CHANGE_CONST, CHANGE_FUN, CHANGE_PRED, EMPTY_ACTION } from '../actions'
 import steps from './steps'
 import language from './language'
 
@@ -24,17 +24,20 @@ function app(state = initialCombinedState, action) {
     case STEP_UP:
     case STEP_DOWN:
     case CHANGE_RULE:
-    case CHANGE_REFERENCE:
+    case CHANGE_REFERENCE1:
+    case CHANGE_REFERENCE2:
     case CHANGE_RENAMING:
     case CHANGE_UNIFIER: {
       const stepsState = steps(state.steps, action, state.language);
       return { language: state.language, steps: stepsState }
     }
     case EMPTY_ACTION: {
-      return {...state};
+      return { ...state };
     }
-    default:
+    default: {
       return state;
+    }
+      
   }
 }
 
