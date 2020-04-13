@@ -1,6 +1,8 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import ErrorMsg from '../components/ErrorMsg'
+import Resolution from './ResolutionParams'
+import Factoring from './FactoringParams'
 
 const Step = ({ index, step, onChange, onDelete, onInsert, onUp, onDown, onRule, onRenaming, onUnifier, onReference1, onReference2, onBlur }) => (
   <div>
@@ -27,42 +29,15 @@ const Step = ({ index, step, onChange, onDelete, onInsert, onUp, onDown, onRule,
       </div>
       <ErrorMsg error={step.formula.error} input={step.formula.input} />
     </div>
-    <div className="row">
-      {(step.rule === "Resolution") &&
-        <div className="form-group col-2">
-          <label htmlFor={"reference1-" + index}>Reference</label>
-          <input type="text" className={`form-control ${step.reference1.error ? "is-invalid" : ""}`} id={"reference1-" + index} 
-          onChange={e => onReference1(e.target.value)} value={step.reference1.input} />
-          <ErrorMsg error={step.reference1.error} />
-        </div>
-      }
-      {(step.rule === "Resolution") &&
-        <div className="form-group col">
-          <label htmlFor={"renaming-" + index}>Renaming</label>
-          <input type="text" className={`form-control ${step.renaming.error ? "is-invalid" : ""}`} id={"renaming-" + index} 
-          onChange={e => onRenaming(e.target.value)} value={step.renaming.input} />
-          <ErrorMsg error={step.renaming.error} input={step.renaming.input} />
-        </div>
-      }
-      {(step.rule === "Resolution" || step.rule === "Factoring") &&
-        <div className="form-group col-2">
-          <label htmlFor={"reference2-" + index}>Reference</label>
-          <input type="text" className={`form-control ${step.reference2.error ? "is-invalid" : ""}`} id={"reference2-" + index}
-          onChange={e => onReference2(e.target.value)} value={step.reference2.input} />
-          <ErrorMsg error={step.reference2.error} />
-        </div>
-      }
-      {(step.rule === "Resolution" || step.rule === "Factoring") &&
-        <div className="form-group col">
-          <label htmlFor={"unifier-" + index}>Unifier</label>
-          <input type="text" className={`form-control ${step.unifier.error ? "is-invalid" : ""}`} id={"unifier-" + index} 
-          onChange={e => onUnifier(e.target.value)} value={step.unifier.input} />
-          <ErrorMsg error={step.unifier.error} input={step.unifier.input} />
-        </div>
-      }
-    </div>
+    {
+      {
+        'Resolution': <Resolution reference1={step.reference1} reference2={step.reference2} renaming={step.renaming} unifier={step.unifier}
+          index={index} onReference1={onReference1} onReference2={onReference2} onRenaming={onRenaming} onUnifier={onUnifier} />,
+        'Factoring': <Factoring reference={step.reference2} unifier={step.unifier} index={index} onReference={onReference2} onUnifier={onUnifier} />
+      }[step.rule]
+    }
   </div>
-)
+);
 
 Step.propTypes = {
   index: PropTypes.number.isRequired,

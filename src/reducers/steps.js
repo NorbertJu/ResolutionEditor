@@ -2,7 +2,37 @@ import { ADD_STEP, CHANGE_STEP, DELETE_STEP, INSERT_STEP, STEP_UP, STEP_DOWN, CH
 import { parseClause, parseSubstitution } from '@fmfi-uk-1-ain-412/js-fol-parser';
 import { Variable, Constant, Function, Literal, Clause } from '../model/index'
 
+const newStep = {
+  formula: {
+    input: "",
+    object: undefined,
+    error: ""
+  },
+  rule: "",
+  reference1: {
+    input: "",
+    object: undefined,
+    error: ""
+  },
+  renaming: {
+    input: "",
+    object: undefined,
+    error: ""
+  },
+  reference2: {
+    input: "",
+    object: undefined,
+    error: ""
+  },
+  unifier: {
+    input: "",
+    object: undefined,
+    error: ""
+  }
+};
+
 const steps = (state = { order: [], allSteps: new Map(), rank: new Map() }, action = { type: undefined }, language) => {
+  console.log(state);
   switch (action.type) {
     case ADD_STEP:
       return Object.assign({}, state, {
@@ -12,34 +42,7 @@ const steps = (state = { order: [], allSteps: new Map(), rank: new Map() }, acti
         ],
         allSteps: new Map([
           ...state.allSteps,
-          [action.id, {
-            formula: {
-              input: "",
-              object: undefined,
-              error: ""
-            },
-            rule: "",
-            renaming: {
-              input: "",
-              object: undefined,
-              error: ""
-            },
-            unifier: {
-              input: "",
-              object: undefined,
-              error: ""
-            },
-            reference1: {
-              input: "",
-              object: undefined,
-              error: ""
-            },
-            reference2: {
-              input: "",
-              object: undefined,
-              error: ""
-            }
-          }]
+          [action.id, newStep]
         ]),
         rank: new Map([
           ...state.rank,
@@ -48,205 +51,150 @@ const steps = (state = { order: [], allSteps: new Map(), rank: new Map() }, acti
       })
 
     case CHANGE_STEP: {
-      let newState = {
-        allSteps: new Map([
-          ...state.allSteps,
-          [action.id, {
-            formula: {
-              input: action.text,
-              object: state.allSteps.get(action.id).formula.object,
-              error: state.allSteps.get(action.id).formula.error
-            },
-            rule: state.allSteps.get(action.id).rule,
-            renaming: state.allSteps.get(action.id).renaming,
-            unifier: state.allSteps.get(action.id).unifier,
-            reference1: state.allSteps.get(action.id).reference1,
-            reference2: state.allSteps.get(action.id).reference2
-          }]
-        ]),
-        order: state.order,
-        rank: state.rank
+      let formula = {
+        ...state.allSteps.get(action.id).formula,
+        input: action.text,
+        error: ""
+      };
+      try {
+        formula.object = parseClause(action.text, getSymbols(language), getFactories(language));
+      } catch (e) {
+        formula.error = e;
       }
-      newState.allSteps.get(action.id).formula.error = checkClause(language, action.text);
-      return newState;
+      return {
+        ...state,
+        allSteps: new Map([...state.allSteps,
+        [action.id, {
+          ...state.allSteps.get(action.id),
+          formula
+        }]
+        ])
+      }
     }
 
-
-    case CHANGE_RULE:
-      return Object.assign({}, state, {
-        allSteps: new Map([
-          ...state.allSteps,
-          [action.id, {
-            formula: state.allSteps.get(action.id).formula,
-            rule: action.text,
-            renaming: state.allSteps.get(action.id).renaming,
-            unifier: state.allSteps.get(action.id).unifier,
-            reference1: state.allSteps.get(action.id).reference1,
-            reference2: state.allSteps.get(action.id).reference2
-          }]
+    case CHANGE_RULE: {
+      return {
+        ...state,
+        allSteps: new Map([...state.allSteps,
+        [action.id, {
+          ...state.allSteps.get(action.id),
+          rule: action.text
+        }]
         ])
-      })
+      }
+    }
 
     case CHANGE_RENAMING: {
-      let newState = {
-        allSteps: new Map([
-          ...state.allSteps,
-          [action.id, {
-            formula: state.allSteps.get(action.id).formula,
-            rule: state.allSteps.get(action.id).rule,
-            renaming: {
-              input: action.text,
-              object: state.allSteps.get(action.id).renaming.object,
-              error: state.allSteps.get(action.id).renaming.error
-            },
-            unifier: state.allSteps.get(action.id).unifier,
-            reference1: state.allSteps.get(action.id).reference1,
-            reference2: state.allSteps.get(action.id).reference2
-          }]
-        ]),
-        order: state.order,
-        rank: state.rank
-      }
+      let renaming = {
+        ...state.allSteps.get(action.id).renaming,
+        input: action.text,
+        error: ""
+      };
       try {
-        if (action.text !== "") {
-          newState.allSteps.get(action.id).renaming.object = parseSubstitution(action.text, getSymbols(language), getFactories(language));
-        }
-        newState.allSteps.get(action.id).renaming.error = "";
+        renaming.object = parseSubstitution(action.text, getSymbols(language), getFactories(language));
       } catch (e) {
-        newState.allSteps.get(action.id).renaming.error = e;
+        renaming.error = e;
       }
-      return newState;
+      return {
+        ...state,
+        allSteps: new Map([...state.allSteps,
+        [action.id, {
+          ...state.allSteps.get(action.id),
+          renaming
+        }]
+        ])
+      }
     }
 
     case CHANGE_UNIFIER: {
-      let newState = {
-        allSteps: new Map([
-          ...state.allSteps,
-          [action.id, {
-            formula: state.allSteps.get(action.id).formula,
-            rule: state.allSteps.get(action.id).rule,
-            renaming: state.allSteps.get(action.id).renaming,
-            unifier: {
-              input: action.text,
-              object: state.allSteps.get(action.id).unifier.object,
-              error: state.allSteps.get(action.id).unifier.error
-            },
-            reference1: state.allSteps.get(action.id).reference1,
-            reference2: state.allSteps.get(action.id).reference2
-          }]
-        ]),
-        order: state.order,
-        rank: state.rank
-      }
+      let unifier = {
+        ...state.allSteps.get(action.id).unifier,
+        input: action.text,
+        error: ""
+      };
       try {
-        if (action.text !== "") {
-          newState.allSteps.get(action.id).unifier.object = parseSubstitution(action.text, getSymbols(language), getFactories(language));
-        }
-        newState.allSteps.get(action.id).unifier.error = "";
+        unifier.object = parseSubstitution(action.text, getSymbols(language), getFactories(language));
       } catch (e) {
-        newState.allSteps.get(action.id).unifier.error = e;
+        unifier.error = e;
       }
-      return newState;
+      return {
+        ...state,
+        allSteps: new Map([...state.allSteps,
+        [action.id, {
+          ...state.allSteps.get(action.id),
+          unifier
+        }]
+        ])
+      }
     }
 
     case CHANGE_REFERENCE1: {
-      let newState = {
-        allSteps: new Map([
-          ...state.allSteps,
-          [action.id, {
-            formula: state.allSteps.get(action.id).formula,
-            rule: state.allSteps.get(action.id).rule,
-            renaming: state.allSteps.get(action.id).renaming,
-            unifier: state.allSteps.get(action.id).unifier,
-            reference1: {
-              input: action.text,
-              object: state.allSteps.get(action.id).reference1.object,
-              error: state.allSteps.get(action.id).reference1.error
-            },
-            reference2: state.allSteps.get(action.id).reference2
-          }]
-        ]),
-        order: state.order,
-        rank: state.rank
-      }
+      let reference1 = {
+        ...state.allSteps.get(action.id).reference1,
+        input: action.text,
+        error: ""
+      };
       if (action.text !== "") {
-        if (newState.order.length < parseInt(action.text)) {
-          newState.allSteps.get(action.id).reference1.error = {
+        if (state.order.length <= parseInt(action.text) || parseInt(action.text) < 1) {
+          reference1.error = {
             name: "IndexError",
             message: "Index out of range."
           };
         } else if (isNaN(parseInt(action.text))) {
-          newState.allSteps.get(action.id).reference1.error = {
+          reference1.error = {
             name: "SyntaxError",
             message: "Expected number but \"" + action.text + "\" found."
           };
         } else {
-          newState.allSteps.get(action.id).reference1.error = ""
+          reference1.error = ""
         }
       } else {
-        newState.allSteps.get(action.id).reference1.error = ""
+        reference1.error = ""
       }
-
-      return newState;
+      return {
+        ...state,
+        allSteps: new Map([...state.allSteps,
+        [action.id, {
+          ...state.allSteps.get(action.id),
+          reference1
+        }]
+        ])
+      }
     }
 
     case CHANGE_REFERENCE2: {
-      let newState = {
-        allSteps: new Map([
-          ...state.allSteps,
-          [action.id, {
-            formula: state.allSteps.get(action.id).formula,
-            rule: state.allSteps.get(action.id).rule,
-            renaming: state.allSteps.get(action.id).renaming,
-            unifier: state.allSteps.get(action.id).unifier,
-            reference1: state.allSteps.get(action.id).reference1,
-            reference2: {
-              input: action.text,
-              object: state.allSteps.get(action.id).reference2.object,
-              error: state.allSteps.get(action.id).reference2.error
-            }
-          }]
-        ]),
-        order: state.order,
-        rank: state.rank
-      }
+      let reference2 = {
+        ...state.allSteps.get(action.id).reference2,
+        input: action.text,
+        error: ""
+      };
       if (action.text !== "") {
-        if (newState.order.length < parseInt(action.text)) {
-          newState.allSteps.get(action.id).reference2.error = {
+        if (state.order.length <= parseInt(action.text) || parseInt(action.text) < 1) {
+          reference2.error = {
             name: "IndexError",
             message: "Index out of range."
           };
         } else if (isNaN(parseInt(action.text))) {
-          newState.allSteps.get(action.id).reference2.error = {
+          reference2.error = {
             name: "SyntaxError",
             message: "Expected number but \"" + action.text + "\" found."
           };
         } else {
-          newState.allSteps.get(action.id).reference2.error = ""
+          reference2.error = ""
         }
       } else {
-        newState.allSteps.get(action.id).reference2.error = ""
+        reference2.error = ""
       }
-
-      return newState;
-    }
-      return Object.assign({}, state, {
-        allSteps: new Map([
-          ...state.allSteps,
-          [action.id, {
-            formula: state.allSteps.get(action.id).formula,
-            rule: state.allSteps.get(action.id).rule,
-            renaming: state.allSteps.get(action.id).renaming,
-            unifier: state.allSteps.get(action.id).unifier,
-            reference1: state.allSteps.get(action.id).reference1,
-            reference2: {
-              input: action.text,
-              object: state.allSteps.get(action.id).reference2.object,
-              error: state.allSteps.get(action.id).reference2.error
-            }
-          }]
+      return {
+        ...state,
+        allSteps: new Map([...state.allSteps,
+        [action.id, {
+          ...state.allSteps.get(action.id),
+          reference2
+        }]
         ])
-      })
+      }
+    }
 
     case DELETE_STEP:
       let delOrder = state.rank.get(action.id);
@@ -259,16 +207,16 @@ const steps = (state = { order: [], allSteps: new Map(), rank: new Map() }, acti
           newRank.set(key, value - 1)
         }
       }
-      return Object.assign({}, state, {
+      return {...state,
         order: [
           ...state.order.filter(id => id !== action.id)
         ],
         allSteps: newSteps,
         rank: newRank,
-      })
+      };
 
-    case INSERT_STEP:
-      return Object.assign({}, state, {
+    case INSERT_STEP: {
+      return {...state,
         order: [
           ...state.order.slice(0, action.position),
           action.id,
@@ -276,46 +224,20 @@ const steps = (state = { order: [], allSteps: new Map(), rank: new Map() }, acti
         ],
         allSteps: new Map([
           ...state.allSteps,
-          [action.id, {
-            formula: {
-              input: "",
-              object: undefined,
-              error: ""
-            },
-            rule: "",
-            renaming: {
-              input: "",
-              object: undefined,
-              error: ""
-            },
-            unifier: {
-              input: "",
-              object: undefined,
-              error: ""
-            },
-            reference1: {
-              input: "",
-              object: undefined,
-              error: ""
-            },
-            reference2: {
-              input: "",
-              object: undefined,
-              error: ""
-            }
-          }]
+          [action.id, newStep]
         ]),
         rank: new Map([
           ...state.rank,
           [action.id, action.position]
         ])
-      })
+      }
+    }
 
-    case STEP_UP:
-      newRank = new Map(state.rank);
+    case STEP_UP: {
+      let newRank = new Map(state.rank);
       newRank.set(action.id, action.position - 1);
       newRank.set(state.rank.get(state.order[action.position - 1]), action.position);
-      return Object.assign({}, state, {
+      return {...state,
         order: [
           ...state.order.slice(0, action.position - 1),
           state.order[action.position],
@@ -323,13 +245,15 @@ const steps = (state = { order: [], allSteps: new Map(), rank: new Map() }, acti
           ...state.order.slice(action.position + 1)
         ],
         rank: newRank
-      })
+      }
+    }
+      
 
-    case STEP_DOWN:
-      newRank = new Map(state.rank);
+    case STEP_DOWN: {
+      let newRank = new Map(state.rank);
       newRank.set(action.id, action.position + 1);
       newRank.set(state.rank.get(state.order[action.position + 1]), action.position);
-      return Object.assign({}, state, {
+      return {...state,
         order: [
           ...state.order.slice(0, action.position),
           state.order[action.position + 1],
@@ -337,16 +261,34 @@ const steps = (state = { order: [], allSteps: new Map(), rank: new Map() }, acti
           ...state.order.slice(action.position + 2)
         ],
         rank: newRank
-      })
-
+      }
+    }
+      
     case CHANGE_CONST:
     case CHANGE_FUN:
     case CHANGE_PRED: {
-      let newState = { ...state }
-      newState.allSteps.forEach(function (value, key, map) {
-        newState.allSteps.get(key).formula.error = checkClause(language, value.formula.input);
+      let newAllSteps = new Map([...state.allSteps]);
+      state.allSteps.forEach(function (value, key, map) {
+        let formula = {
+          ...state.allSteps.get(key).formula,
+          error: ""
+        };
+        try {
+          formula.object = parseClause(value.formula.input, getSymbols(language), getFactories(language));
+        } catch (e) {
+          formula.error = e;
+        }
+        newAllSteps = new Map ([...newAllSteps,
+          [key, {
+            ...state.allSteps.get(key),
+            formula
+          }]
+        ]);
       })
-      return newState
+      return {
+        ...state,
+        allSteps: newAllSteps
+      }
     }
 
     default:
@@ -367,11 +309,11 @@ function getFactories(language) {
     constant: (symbol, _) =>
       new Constant(symbol),
     functionApplication: (funSymbol, args, ee) => {
-      checkArity(funSymbol, args, language.fun.object, ee);
+      checkArity(funSymbol, args, language.funs.object, ee);
       return new Function(funSymbol, args);
     },
     literal: (negated, predSymbol, args, ee) => {
-      checkArity(predSymbol, args, language.pred.object, ee);
+      checkArity(predSymbol, args, language.preds.object, ee);
       return new Literal(negated, predSymbol, args);
     },
     clause: (literals, _) =>
@@ -380,27 +322,16 @@ function getFactories(language) {
 }
 
 function getSymbols(language) {
-  const nonLogicalSymbols = new Set([...language.const.object, ...language.fun.object.keys(), ...language.pred.object.keys()]);
+  const nonLogicalSymbols = new Set([...language.consts.object, ...language.funs.object.keys(), ...language.preds.object.keys()]);
   return {
     isConstant: (symbol) =>
-      language.const.object.has(symbol),
+      language.consts.object.has(symbol),
     isFunction: (symbol) =>
-      language.fun.object.has(symbol),
+      language.funs.object.has(symbol),
     isPredicate: (symbol) =>
-      language.pred.object.has(symbol),
+      language.preds.object.has(symbol),
     isVariable: (symbol) =>
       !nonLogicalSymbols.has(symbol),
-  }
-}
-
-function checkClause(language, input) {
-  try {
-    if (input !== "") {
-      parseClause(input, getSymbols(language), getFactories(language));
-    }
-    return "";
-  } catch (e) {
-    return e;
   }
 }
 

@@ -1,75 +1,34 @@
 import { CHANGE_CONST, CHANGE_FUN, CHANGE_PRED } from '../actions';
 import {parseConstants, parseFunctions, parsePredicates} from '@fmfi-uk-1-ain-412/js-fol-parser';
 
-const language = (state = { const: { input: "", object: new Set(), error: ""}, fun: { input: "", object: new Map(), error: "" }, pred: { input: "", object: new Map(), error: "" }, factories: {} }, action = {type: undefined}) => {
+const language = (state = { consts: { input: "", object: new Set(), error: ""}, funs: { input: "", object: new Map(), error: "" }, preds: { input: "", object: new Map(), error: "" }}, action = {type: undefined}) => {
     switch (action.type) {
         case CHANGE_CONST:
-            let newState = {
-                const: {
-                    input: action.text,
-                    object: state.const.object,
-                    error: state.const.error
-                },
-                fun: state.fun,
-                pred: state.pred
-            }
+            let consts = {...state.consts, input: action.text, error: ""};
             try {
-                let res = undefined;
-                if (action.text !== "") {
-                    res = parseConstants(action.text); 
-                }
-                newState.const.object = new Set(res);
-                newState.const.error = "";
+                consts.object = new Set(parseConstants(action.text));
             } catch (e) {
-                newState.const.error = e;
+                consts.error = e;
             }
-            return newState;
+            return {...state, consts};
 
         case CHANGE_FUN:
-            newState = {
-                const: state.const,
-                fun: {
-                    input: action.text,
-                    object: state.fun.object,
-                    error: state.fun.error
-                },
-                pred: state.pred
-            }
+            let funs = {...state.funs, input: action.text, error: ""};
             try {
-                let res = undefined;
-                if (action.text !== "") {
-                    res = parseFunctions(action.text); 
-                    res = res.map(obj => [obj.name, obj.arity]);
-                }
-                newState.fun.object = new Map(res);
-                newState.fun.error = "";
+                funs.object = new Map(parseFunctions(action.text).map(obj => [obj.name, obj.arity]));
             } catch (e) {
-                newState.fun.error = e;
+                funs.error = e;
             }
-            return newState;
+            return {...state, funs};
 
         case CHANGE_PRED:
-            newState = {
-                const: state.const,
-                fun: state.fun,
-                pred: {
-                    input: action.text,
-                    object: state.pred.object,
-                    error: state.pred.error
-                }
-            }
+            let preds = {...state.preds, input: action.text, error: ""};
             try {
-                let res = undefined;
-                if (action.text !== "") {
-                    res = parsePredicates(action.text); 
-                    res = res.map(obj => [obj.name, obj.arity]);
-                }
-                newState.pred.object = new Map(res);
-                newState.pred.error = "";
+                preds.object = new Map(parseFunctions(action.text).map(obj => [obj.name, obj.arity]));
             } catch (e) {
-                newState.pred.error = e;
+                preds.error = e;
             }
-            return newState;
+            return {...state, preds};
 
         default:
             return state

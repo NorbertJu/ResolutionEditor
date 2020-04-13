@@ -1,4 +1,4 @@
-import undoable, { groupByActionTypes } from 'redux-undo';
+import undoable, { groupByActionTypes, excludeAction } from 'redux-undo';
 import { ADD_STEP, CHANGE_STEP, DELETE_STEP, INSERT_STEP, STEP_UP, STEP_DOWN, CHANGE_RULE, CHANGE_RENAMING, CHANGE_REFERENCE1, CHANGE_REFERENCE2, CHANGE_UNIFIER, CHANGE_CONST, CHANGE_FUN, CHANGE_PRED, EMPTY_ACTION } from '../actions'
 import steps from './steps'
 import language from './language'
@@ -42,7 +42,8 @@ function app(state = initialCombinedState, action) {
 }
 
 const undoableState = undoable(app, {
-  groupBy: groupByActionTypes([CHANGE_STEP]),
+  
+
 })
 
 export default undoableState;
