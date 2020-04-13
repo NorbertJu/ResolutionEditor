@@ -32,7 +32,6 @@ const newStep = {
 };
 
 const steps = (state = { order: [], allSteps: new Map(), rank: new Map() }, action = { type: undefined }, language) => {
-  console.log(state);
   switch (action.type) {
     case ADD_STEP:
       return Object.assign({}, state, {
