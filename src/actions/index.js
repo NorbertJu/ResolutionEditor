@@ -12,12 +12,19 @@ export const STEP_DOWN = 'STEP_DOWN';
 export const CHANGE_CONST = 'CHANGE_CONST';
 export const CHANGE_FUN = 'CHANGE_FUN';
 export const CHANGE_PRED = 'CHANGE_PRED';
-export const EMPTY_ACTION = 'EMPTY_ACTION';
+export const INPUT_FOCUS = 'INPUT_FOCUS';
+export const INPUT_BLUR = 'INPUT_BLUR';
 
 let nextStepId = 0;
 
-export const emptyAction = () => ({
-  type: EMPTY_ACTION
+export const inputFocus = (text) => ({
+  type: INPUT_FOCUS,
+  text
+})
+
+export const inputBlur = (text) => ({
+  type: INPUT_BLUR,
+  text
 })
 
 export const addStep = () => ({

@@ -11,7 +11,7 @@ class Variable extends Term {
   }
 
   substitute(map){
-    if (map.has(this.name)) {
+    if (map && map.has(this.name)) {
       return map.get(this.name);
     }
     return new Variable(this.name);

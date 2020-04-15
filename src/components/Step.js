@@ -4,7 +4,7 @@ import ErrorMsg from '../components/ErrorMsg'
 import Resolution from './ResolutionParams'
 import Factoring from './FactoringParams'
 
-const Step = ({ index, step, onChange, onDelete, onInsert, onUp, onDown, onRule, onRenaming, onUnifier, onReference1, onReference2, onBlur }) => (
+const Step = ({ index, step, onChange, onDelete, onInsert, onUp, onDown, onRule, onRenaming, onUnifier, onReference1, onReference2, onBlur, onFocus }) => (
   <div>
     <button type="button" className="btn btn-light btn-sm" onClick={onInsert} style={{ float: "right" }}> + </button>
 
@@ -12,9 +12,12 @@ const Step = ({ index, step, onChange, onDelete, onInsert, onUp, onDown, onRule,
       <div className="input-group-prepend">
         <span className="input-group-text">{index}</span>
       </div>
-      <input type="text" className={`form-control ${step.formula.error ? "is-invalid" : ""}`} name="item"
+      <input type="text" name="item" className={`form-control 
+        ${step.formula.error ? "is-invalid" : ""}
+        ${step.valid ? "is-valid" : ""}`} 
         onChange={e => onChange(e.target.value)}
-        onBlur={e => onBlur()}
+        onBlur={e => onBlur(e.target.value)}
+        onFocus={e => onFocus(e.target.value)}
         value={step.formula.input}
       />
       <div className="input-group-append">

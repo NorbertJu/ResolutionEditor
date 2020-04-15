@@ -28,7 +28,8 @@ const newStep = {
     input: "",
     object: undefined,
     error: ""
-  }
+  },
+  valid: false
 };
 
 const steps = (state = { order: [], allSteps: new Map(), rank: new Map() }, action = { type: undefined }, language) => {
@@ -60,7 +61,7 @@ const steps = (state = { order: [], allSteps: new Map(), rank: new Map() }, acti
       } catch (e) {
         formula.error = e;
       }
-      return {
+      let newState = {
         ...state,
         allSteps: new Map([...state.allSteps,
         [action.id, {
@@ -69,10 +70,12 @@ const steps = (state = { order: [], allSteps: new Map(), rank: new Map() }, acti
         }]
         ])
       }
+      validate(newState, action);
+      return newState;
     }
 
     case CHANGE_RULE: {
-      return {
+      let newState = {
         ...state,
         allSteps: new Map([...state.allSteps,
         [action.id, {
@@ -80,7 +83,9 @@ const steps = (state = { order: [], allSteps: new Map(), rank: new Map() }, acti
           rule: action.text
         }]
         ])
-      }
+      };
+      validate(newState, action);
+      return newState;
     }
 
     case CHANGE_RENAMING: {
@@ -90,11 +95,11 @@ const steps = (state = { order: [], allSteps: new Map(), rank: new Map() }, acti
         error: ""
       };
       try {
-        renaming.object = parseSubstitution(action.text, getSymbols(language), getFactories(language));
+        renaming.object = new Map(parseSubstitution(action.text, getSymbols(language), getFactories(language)));
       } catch (e) {
         renaming.error = e;
       }
-      return {
+      let newState = {
         ...state,
         allSteps: new Map([...state.allSteps,
         [action.id, {
@@ -103,6 +108,8 @@ const steps = (state = { order: [], allSteps: new Map(), rank: new Map() }, acti
         }]
         ])
       }
+      validate(newState, action);
+      return newState;
     }
 
     case CHANGE_UNIFIER: {
@@ -112,11 +119,11 @@ const steps = (state = { order: [], allSteps: new Map(), rank: new Map() }, acti
         error: ""
       };
       try {
-        unifier.object = parseSubstitution(action.text, getSymbols(language), getFactories(language));
+        unifier.object = new Map(parseSubstitution(action.text, getSymbols(language), getFactories(language)));
       } catch (e) {
         unifier.error = e;
       }
-      return {
+      let newState = {
         ...state,
         allSteps: new Map([...state.allSteps,
         [action.id, {
@@ -125,6 +132,8 @@ const steps = (state = { order: [], allSteps: new Map(), rank: new Map() }, acti
         }]
         ])
       }
+      validate(newState, action);
+      return newState;
     }
 
     case CHANGE_REFERENCE1: {
@@ -134,7 +143,7 @@ const steps = (state = { order: [], allSteps: new Map(), rank: new Map() }, acti
         error: ""
       };
       if (action.text !== "") {
-        if (state.order.length <= parseInt(action.text) || parseInt(action.text) < 1) {
+        if (state.rank.get(action.id) < parseInt(action.text) || parseInt(action.text) < 1) {
           reference1.error = {
             name: "IndexError",
             message: "Index out of range."
@@ -145,12 +154,14 @@ const steps = (state = { order: [], allSteps: new Map(), rank: new Map() }, acti
             message: "Expected number but \"" + action.text + "\" found."
           };
         } else {
+          reference1.object = parseInt(action.text)-1;
           reference1.error = ""
         }
       } else {
+        reference1.object = parseInt(action.text)-1;
         reference1.error = ""
       }
-      return {
+      let newState = {
         ...state,
         allSteps: new Map([...state.allSteps,
         [action.id, {
@@ -159,6 +170,8 @@ const steps = (state = { order: [], allSteps: new Map(), rank: new Map() }, acti
         }]
         ])
       }
+      validate(newState, action);
+      return newState;
     }
 
     case CHANGE_REFERENCE2: {
@@ -168,7 +181,7 @@ const steps = (state = { order: [], allSteps: new Map(), rank: new Map() }, acti
         error: ""
       };
       if (action.text !== "") {
-        if (state.order.length <= parseInt(action.text) || parseInt(action.text) < 1) {
+        if (state.rank.get(action.id) < parseInt(action.text) || parseInt(action.text) < 1) {
           reference2.error = {
             name: "IndexError",
             message: "Index out of range."
@@ -179,12 +192,14 @@ const steps = (state = { order: [], allSteps: new Map(), rank: new Map() }, acti
             message: "Expected number but \"" + action.text + "\" found."
           };
         } else {
+          reference2.object = parseInt(action.text)-1;
           reference2.error = ""
         }
       } else {
+        reference2.object = parseInt(action.text)-1;
         reference2.error = ""
       }
-      return {
+      let newState = {
         ...state,
         allSteps: new Map([...state.allSteps,
         [action.id, {
@@ -193,13 +208,15 @@ const steps = (state = { order: [], allSteps: new Map(), rank: new Map() }, acti
         }]
         ])
       }
+      validate(newState, action);
+      return newState;
     }
 
-    case DELETE_STEP:
+    case DELETE_STEP: {
       let delOrder = state.rank.get(action.id);
-      let newSteps = new Map(state.allSteps);
+      let newSteps = new Map([...state.allSteps]);
       newSteps.delete(action.id);
-      let newRank = new Map(state.rank);
+      let newRank = new Map([...state.rank]);
       newRank.delete(action.id);
       for (var [key, value] of newRank.entries()) {
         if (value > delOrder) {
@@ -213,8 +230,16 @@ const steps = (state = { order: [], allSteps: new Map(), rank: new Map() }, acti
         allSteps: newSteps,
         rank: newRank,
       };
+    }  
 
     case INSERT_STEP: {
+      let newRank = new Map([...state.rank]);
+      for (var [key, value] of newRank.entries()) {
+        if (value >= action.position) {
+          newRank.set(key, value + 1)
+        }
+      }
+      newRank.set(action.id, action.position);
       return {...state,
         order: [
           ...state.order.slice(0, action.position),
@@ -225,17 +250,14 @@ const steps = (state = { order: [], allSteps: new Map(), rank: new Map() }, acti
           ...state.allSteps,
           [action.id, newStep]
         ]),
-        rank: new Map([
-          ...state.rank,
-          [action.id, action.position]
-        ])
+        rank: newRank
       }
     }
 
     case STEP_UP: {
-      let newRank = new Map(state.rank);
-      newRank.set(action.id, action.position - 1);
-      newRank.set(state.rank.get(state.order[action.position - 1]), action.position);
+      let newRank = new Map([...state.rank]);
+      newRank.set(state.order[action.position], action.position - 1);
+      newRank.set(state.order[action.position - 1], action.position);
       return {...state,
         order: [
           ...state.order.slice(0, action.position - 1),
@@ -245,13 +267,12 @@ const steps = (state = { order: [], allSteps: new Map(), rank: new Map() }, acti
         ],
         rank: newRank
       }
-    }
-      
+    }  
 
     case STEP_DOWN: {
-      let newRank = new Map(state.rank);
-      newRank.set(action.id, action.position + 1);
-      newRank.set(state.rank.get(state.order[action.position + 1]), action.position);
+      let newRank = new Map([...state.rank]);
+      newRank.set(state.order[action.position], action.position + 1);
+      newRank.set(state.order[action.position + 1], action.position);
       return {...state,
         order: [
           ...state.order.slice(0, action.position),
@@ -266,32 +287,91 @@ const steps = (state = { order: [], allSteps: new Map(), rank: new Map() }, acti
     case CHANGE_CONST:
     case CHANGE_FUN:
     case CHANGE_PRED: {
-      let newAllSteps = new Map([...state.allSteps]);
-      state.allSteps.forEach(function (value, key, map) {
-        let formula = {
-          ...state.allSteps.get(key).formula,
-          error: ""
-        };
+      const allSteps = new Map();
+      state.allSteps.forEach((step, id) => {
+        let object = step.formula.object;
+        let error = "";
         try {
-          formula.object = parseClause(value.formula.input, getSymbols(language), getFactories(language));
+          object = parseClause(step.formula.input,
+            getSymbols(language), getFactories(language));
         } catch (e) {
-          formula.error = e;
+          error = e;
         }
-        newAllSteps = new Map ([...newAllSteps,
-          [key, {
-            ...state.allSteps.get(key),
-            formula
-          }]
-        ]);
-      })
-      return {
-        ...state,
-        allSteps: newAllSteps
-      }
+        allSteps.set(id,
+          {
+            ...step,
+            formula: { ...step.formula, object, error }
+          }
+        );
+      });
+      return { ...state, allSteps };
     }
 
     default:
       return state
+  }
+}
+
+function validate(state, action) {
+  let step = state.allSteps.get(action.id);
+  console.log(step);
+  switch (step.rule) {
+    case "Factoring": {
+      if (step.reference2.error === "" && step.reference2.input !== "") {
+        let premise = state.allSteps.get(state.order[parseInt(step.reference2.object)]);
+        if (premise.valid) {
+          if ((step.formula.error === "" || step.formula.error.name ==="LogicError") && step.formula.input !== "") {
+            if (step.formula.object.isFactorOf(premise.formula.object, step.unifier.object)) {
+              state.allSteps.set(action.id, {...step, valid:true, formula:{...step.formula, error:""}});
+              break;
+            } else {
+              state.allSteps.set(action.id, {...step, valid:false, formula:{...step.formula, error:{
+                name: "LogicError",
+                message: "Clause " + (state.order[action.id] + 1) + " is not valid factor of clause " + step.reference2.input
+              }}});
+              break;
+            }
+          }
+        }
+      }
+      state.allSteps.set(action.id, {...step, valid:false});
+      break;
+    }
+
+    case "Resolution": {
+      if (step.reference2.error === "" && step.reference2.input !== "" && step.reference1.error === "" && step.reference1.input !== "") {
+        let premise1 = state.allSteps.get(state.order[parseInt(step.reference1.object)]);
+        let premise2 = state.allSteps.get(state.order[parseInt(step.reference2.object)]);
+        if (premise1.valid && premise2.valid) {
+          if ((step.formula.error === "" || step.formula.error.name ==="LogicError") && step.formula.object !== undefined) {
+            if (step.formula.object.isResolventOf(premise1.formula.object, premise2.formula.object, step.renaming.object, step.unifier.object)) {
+              state.allSteps.set(action.id, {...step, valid:true, formula:{...step.formula, error:""}});
+              break;
+            } else {
+              state.allSteps.set(action.id, {...step, valid:false, formula:{...step.formula, error:{
+                name: "LogicError",
+                message: "Clause " + (state.order[action.id] + 1) + " is not valid resolvent of clauses " + step.reference1.input + " and " + step.reference2.input
+              }}});
+              break;
+            }
+          }
+        }
+      }
+      state.allSteps.set(action.id, {...step, valid:false});
+      break;
+    }
+
+    case "": {
+      if (step.formula.error === "" && step.formula.input !== "") {
+        state.allSteps.set(action.id, {...step, valid:true});
+        break;
+      }
+      state.allSteps.set(action.id, {...step, valid:false});
+      break;
+    }
+  
+    default:
+      break;
   }
 }
 
