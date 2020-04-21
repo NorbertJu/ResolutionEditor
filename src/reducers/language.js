@@ -7,7 +7,12 @@ const language = (state = { consts: { input: "", object: new Set(), error: ""}, 
         case CHANGE_CONST:
             let consts = {...state.consts, input: action.text, error: ""};
             try {
-                consts.object = new Set(parseConstants(action.text));
+                if (action.text !== "") {
+                    consts.object = new Set(parseConstants(action.text));
+                } else {
+                    consts.object = new Set();
+                }
+                
             } catch (e) {
                 consts.error = e;
             }
@@ -16,7 +21,11 @@ const language = (state = { consts: { input: "", object: new Set(), error: ""}, 
         case CHANGE_FUN:
             let funs = {...state.funs, input: action.text, error: ""};
             try {
-                funs.object = new Map(parseFunctions(action.text).map(obj => [obj.name, obj.arity]));
+                if (action.text !== "") {
+                    funs.object = new Map(parseFunctions(action.text).map(obj => [obj.name, obj.arity]));
+                } else {
+                    funs.object = new Map();
+                }   
             } catch (e) {
                 funs.error = e;
             }
@@ -25,7 +34,7 @@ const language = (state = { consts: { input: "", object: new Set(), error: ""}, 
         case CHANGE_PRED:
             let preds = {...state.preds, input: action.text, error: ""};
             try {
-                preds.object = new Map(parseFunctions(action.text).map(obj => [obj.name, obj.arity]));
+                preds.object = new Map(parsePredicates(action.text).map(obj => [obj.name, obj.arity]));
             } catch (e) {
                 preds.error = e;
             }

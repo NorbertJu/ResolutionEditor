@@ -21,7 +21,9 @@ const Step = ({ index, step, onChange, onDelete, onInsert, onUp, onDown, onRule,
         value={step.formula.input}
       />
       <div className="input-group-append">
-        <select className="form-control" onChange={e => onRule(e.target.value)} value={step.rule}>
+        <select className="form-control" 
+        onChange={e => onRule(e.target.value)} 
+        value={step.rule}>
           <option>Assumption</option>
           <option>Resolution</option>
           <option>Factoring</option>
@@ -35,8 +37,10 @@ const Step = ({ index, step, onChange, onDelete, onInsert, onUp, onDown, onRule,
     {
       {
         'Resolution': <Resolution reference1={step.reference1} reference2={step.reference2} renaming={step.renaming} unifier={step.unifier}
-          index={index} onReference1={onReference1} onReference2={onReference2} onRenaming={onRenaming} onUnifier={onUnifier} />,
-        'Factoring': <Factoring reference={step.reference2} unifier={step.unifier} index={index} onReference={onReference2} onUnifier={onUnifier} />
+          index={index} onReference1={onReference1} onReference2={onReference2} onRenaming={onRenaming} onUnifier={onUnifier} 
+          onFocus={onFocus} onBlur={onBlur}/>,
+        'Factoring': <Factoring reference={step.reference2} unifier={step.unifier} index={index} onReference={onReference2} onUnifier={onUnifier}
+          onFocus={onFocus} onBlur={onBlur} />
       }[step.rule]
     }
   </div>

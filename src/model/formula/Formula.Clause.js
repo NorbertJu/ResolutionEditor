@@ -74,8 +74,8 @@ class Clause extends Formula {
       const nlit1 = lit1.negation();
       for (const [lit2, _] of lm2){
         if (nlit1.equals(lit2)){
-          yield new Clause(lm1.flatMap(([l1, n1]) => new Array(lit1 == l1 ? n1 - 1 : n1).fill(l1))
-          .concat(lm2.flatMap(([l2, n2]) => new Array(lit2 == l2 ? n2 - 1 : n2).fill(l2))));
+          yield new Clause(lm1.flatMap(([l1, n1]) => new Array(lit1 === l1 ? n1 - 1 : n1).fill(l1))
+          .concat(lm2.flatMap(([l2, n2]) => new Array(lit2 === l2 ? n2 - 1 : n2).fill(l2))));
           break;
         }
       }
@@ -95,7 +95,7 @@ class Clause extends Formula {
     const lm = this.substitute(unifier).getLitsMultiset();
     for (const [lit, n] of lm) {
       if (n >= 2) {
-        yield new Clause(lm.flatMap(([lit1, n1]) => new Array(lit1 == lit ? n1 - 1 : n1).fill(lit1)));
+        yield new Clause(lm.flatMap(([lit1, n1]) => new Array(lit1 === lit ? n1 - 1 : n1).fill(lit1)));
       }
     }
   }
