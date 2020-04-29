@@ -8,7 +8,7 @@ class FunctionTerm extends Term {
   }
 
   toString() {
-    return this.name + '(' + this.subts.map(subt => subt.toString()).join(', ') + ')';
+    return `${ this.name }(${ this.subts.join(', ') })`;
   }
 
   equals(other) {

@@ -1,11 +1,7 @@
-import React, {useState} from 'react'
-import ErrorMsg from './ErrorMsg'
-import {parseConstants, parseFunctions, parsePredicates} from '@fmfi-uk-1-ain-412/js-fol-parser'
+import React from 'react'
+import ErrorMsg from '../components/ErrorMsg'
 
-const Language = ({steps, onConstChange, onFunChange, onPredChange, constInput, funInput, predInput}) => {
-    let[constError, setConstError] = useState(undefined);
-    let[funError, setFunError] = useState(undefined);
-    let[predError, setPredError] = useState(undefined);
+const Language = ({language, onConstChange, onFunChange, onPredChange, onFocus, onBlur}) => {
     return (
     <div className="mt-3">
         <h2>Language</h2>
@@ -13,68 +9,38 @@ const Language = ({steps, onConstChange, onFunChange, onPredChange, constInput, 
             <div className="input-group-prepend">
                 <span className="input-group-text" id="basic-addon1">Constants</span>
             </div>
-            <input type="text" className="form-control" name="constants"
-            onChange={e => {
-                onConstChange(e.target.value);
-                try { constInput = e.target; 
-                    if (constInput.value !== "") parseConstants(e.target.value); 
-                    setConstError(undefined); 
-                    constInput.classList.remove("border-danger");
-                    constInput.parentElement.classList.remove("mb-0");
-                    constInput.parentElement.classList.add("mb-3");
-                } 
-                catch (e) {setConstError({...e,input: constInput}); 
-                    constInput.classList.add("border-danger");
-                } 
-            }}
-            value={steps.language.constants}/>
+            <input type="text" className={`form-control ${language.consts.error ? "is-invalid" : ""}`} name="constants"
+            onChange={e => onConstChange(e.target.value)}
+            onBlur={e => onBlur(e.target.value)}
+            onFocus={e => onFocus(e.target.value)}
+            value={language.consts.input}/>
+            <ErrorMsg error={language.consts.error} input={language.consts.input} />
         </div>
-        <ErrorMsg error={constError}/>
+        
         <div className="input-group mb-3">
             <div className="input-group-prepend">
                 <span className="input-group-text" id="basic-addon1">Functions</span>
             </div>
-            <input type="text" className="form-control" name="functions" 
-            onChange={e => {
-                onFunChange(e.target.value);
-                try {funInput = e.target; 
-                    if (funInput.value !== "") parseFunctions(e.target.value); 
-                    setFunError(undefined); 
-                    funInput.classList.remove("border-danger");
-                    funInput.parentElement.classList.remove("mb-0");
-                    funInput.parentElement.classList.add("mb-3");
-                }
-                catch (e) {setFunError({...e,input: funInput}); 
-                    funInput.classList.add("border-danger");
-                }
-            }} 
-            value={steps.language.functions}/>
+            <input type="text" className={`form-control ${language.funs.error ? "is-invalid" : ""}`} name="functions" 
+            onChange={e => onFunChange(e.target.value)}
+            onBlur={e => onBlur(e.target.value)}
+            onFocus={e => onFocus(e.target.value)} 
+            value={language.funs.input}/>
+            <ErrorMsg error={language.funs.error} input={language.funs.input} />
         </div>
-        <ErrorMsg error={funError}/>
         <div className="input-group mb-3">
             <div className="input-group-prepend">
                 <span className="input-group-text" id="basic-addon1">Predicates</span>
             </div>
-            <input type="text" className="form-control" name="predicates" 
-            onChange={e => {
-                onPredChange(e.target.value);
-                try {predInput = e.target; 
-                    if (predInput.value !== "") parsePredicates(e.target.value); 
-                    setPredError(undefined); 
-                    predInput.classList.remove("border-danger");
-                    predInput.parentElement.classList.remove("mb-0");
-                    predInput.parentElement.classList.add("mb-3");
-                } 
-                catch (e) {setPredError({...e,input: predInput});
-                    predInput.classList.add("border-danger");
-                }
-            }} 
-            value={steps.language.predicates}/>
+            <input type="text" className={`form-control ${language.preds.error ? "is-invalid" : ""}`} name="predicates" 
+            onChange={e => onPredChange(e.target.value)} 
+            onBlur={e => onBlur(e.target.value)}
+            onFocus={e => onFocus(e.target.value)}
+            value={language.preds.input}/>
+            <ErrorMsg error={language.preds.error} input={language.preds.input} />
         </div>
-        <ErrorMsg error={predError}/>
+
     </div>
 )}
-
-
 
 export default Language

@@ -7,6 +7,7 @@
   },
   "dependencies": {
     "@fmfi-uk-1-ain-412/js-fol-parser": "^0.4.2",
+    "bootstrap": "^4.4.1",
     "prop-types": "^15.7.2",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",

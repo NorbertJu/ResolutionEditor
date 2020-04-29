@@ -3,7 +3,8 @@ export const CHANGE_STEP = 'CHANGE_STEP';
 export const CHANGE_RULE = 'CHANGE_RULE';
 export const CHANGE_UNIFIER = 'CHANGE_UNIFIER';
 export const CHANGE_RENAMING = 'CHANGE_RENAMING';
-export const CHANGE_REFERENCE = 'CHANGE_REFERENCE';
+export const CHANGE_REFERENCE1 = 'CHANGE_REFERENCE1';
+export const CHANGE_REFERENCE2 = 'CHANGE_REFERENCE2';
 export const DELETE_STEP = 'DELETE_STEP';
 export const INSERT_STEP = 'INSERT_STEP';
 export const STEP_UP = 'STEP_UP';
@@ -11,8 +12,20 @@ export const STEP_DOWN = 'STEP_DOWN';
 export const CHANGE_CONST = 'CHANGE_CONST';
 export const CHANGE_FUN = 'CHANGE_FUN';
 export const CHANGE_PRED = 'CHANGE_PRED';
+export const INPUT_FOCUS = 'INPUT_FOCUS';
+export const INPUT_BLUR = 'INPUT_BLUR';
 
 let nextStepId = 0;
+
+export const inputFocus = (text) => ({
+  type: INPUT_FOCUS,
+  text
+})
+
+export const inputBlur = (text) => ({
+  type: INPUT_BLUR,
+  text
+})
 
 export const addStep = () => ({
   type: ADD_STEP,
@@ -43,8 +56,14 @@ export const changeRenaming = (id, text) => ({
   text
 })
 
-export const changeReference = (id, text) => ({
-  type: CHANGE_REFERENCE,
+export const changeReference1 = (id, text) => ({
+  type: CHANGE_REFERENCE1,
+  id,
+  text
+})
+
+export const changeReference2 = (id, text) => ({
+  type: CHANGE_REFERENCE2,
   id,
   text
 })
