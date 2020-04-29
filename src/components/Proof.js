@@ -5,7 +5,6 @@ import Step from './Step'
 const Proof = ({ steps, onStepDelete, onStepChange, onStepInsert, onStepUp, onStepDown, onRuleChange, onRenaming, onUnifier, onReference1, onReference2, inputFocus, inputBlur}) => (
   <div style={{margin:'20px 0px'}}>
     <h2>Proof</h2>
-    {console.log(steps)}
     {steps.order.map((id, index) =>
       <Step
         key={id}

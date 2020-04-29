@@ -1,6 +1,7 @@
 import { ADD_STEP, CHANGE_STEP, DELETE_STEP, INSERT_STEP, STEP_UP, STEP_DOWN, CHANGE_RULE, CHANGE_RENAMING, CHANGE_REFERENCE1, CHANGE_REFERENCE2, CHANGE_UNIFIER, CHANGE_CONST, CHANGE_FUN, CHANGE_PRED } from '../actions'
 import { parseClause, parseSubstitution } from '@fmfi-uk-1-ain-412/js-fol-parser';
 import { Variable, Constant, Function, Literal, Clause } from '../model/index'
+import step from './step'
 
 const newStep = {
   formula: {
@@ -51,182 +52,44 @@ const steps = (state = { order: [], allSteps: new Map(), rank: new Map() }, acti
       })
 
     case CHANGE_STEP: {
-      let formula = {
-        ...state.allSteps.get(action.id).formula,
-        input: action.text,
-        error: ""
-      };
-      try {
-        formula.object = parseClause(action.text, getSymbols(language), getFactories(language));
-      } catch (e) {
-        formula.error = e;
+      const allSteps = new Map(state.allSteps);
+      let from = state.rank.get(action.id);
+      let checked = new Set();
+      for (let i = from; i < state.order.length; i++) {
+        let id = state.order[i];
+        let s = allSteps.get(id);
+        if (i === from) {
+          checked.add(i);
+          allSteps.set(id, validateStep(
+            step(s, action, state, language),
+            state
+          ));
+        }
+        else if (s.rule === "Factoring" && checked.has(s.reference2.object) ||
+        s.rule === "Resolution" && (checked.has(s.reference2.object) || checked.has(s.reference1.object))) {
+          checked.add(i);
+          action.check = true;
+          allSteps.set(id, validateStep(
+            step(s, action, state, language),
+            { ...state, allSteps }
+          ));
+        }
       }
-      let newState = {
+      return { ...state, allSteps };
+    }
+
+    case CHANGE_RULE:
+    case CHANGE_RENAMING:
+    case CHANGE_UNIFIER:
+    case CHANGE_REFERENCE1:
+    case CHANGE_REFERENCE2: {
+      return {
         ...state,
         allSteps: new Map([...state.allSteps,
         [action.id,
-          validateStep({
-            ...state.allSteps.get(action.id),
-            formula
-          }, state)]
-        ])
-      }
-      return newState;
-    }
-
-    case CHANGE_RULE: {
-      let newState = {
-        ...state,
-        allSteps: new Map([...state.allSteps,
-        [action.id, 
-          validateStep({
-            ...state.allSteps.get(action.id),
-            rule: action.text
-          }, state)]
+        validateStep(step(state.allSteps.get(action.id), action, state, language), state)]
         ])
       };
-      return newState;
-    }
-
-    case CHANGE_RENAMING: {
-      let renaming = {
-        ...state.allSteps.get(action.id).renaming,
-        input: action.text,
-        error: ""
-      };
-      try {
-        if (action.text !== "") {
-          renaming.object = new Map(parseSubstitution(action.text, getSymbols(language), getFactories(language)));
-          for (const [key, value] of renaming.object) {
-            console.log(value);
-            if (!(value instanceof Variable)) {
-              renaming.error = {
-                name: "TypeError",
-                message: "\""+key+"\" is renamed to \""+ value+"\", which is not a variable"
-              }
-            }
-          }
-        } else {
-          renaming.object = undefined;
-        }
-      } catch (e) {
-        renaming.error = e;
-      }
-      let newState = {
-        ...state,
-        allSteps: new Map([...state.allSteps,
-        [action.id, 
-          validateStep({
-            ...state.allSteps.get(action.id),
-            renaming
-          }, state)]
-        ])
-      }
-      return newState;
-    }
-
-    case CHANGE_UNIFIER: {
-      let unifier = {
-        ...state.allSteps.get(action.id).unifier,
-        input: action.text,
-        error: ""
-      };
-      try {
-        if (action.text !== "") {
-          unifier.object = new Map(parseSubstitution(action.text, getSymbols(language), getFactories(language)));
-        } else {
-          unifier.object = undefined;
-        }
-      } catch (e) {
-        unifier.error = e;
-      }
-      let newState = {
-        ...state,
-        allSteps: new Map([...state.allSteps,
-        [action.id, 
-          validateStep ({
-            ...state.allSteps.get(action.id),
-            unifier
-          }, state)]
-        ])
-      }
-      return newState;
-    }
-
-    case CHANGE_REFERENCE1: {
-      let reference1 = {
-        ...state.allSteps.get(action.id).reference1,
-        input: action.text,
-        error: ""
-      };
-      if (action.text !== "") {
-        if (state.rank.get(action.id) < parseInt(action.text) || parseInt(action.text) < 1) {
-          reference1.error = {
-            name: "IndexError",
-            message: "Index out of range."
-          };
-        } else if (isNaN(parseInt(action.text))) {
-          reference1.error = {
-            name: "SyntaxError",
-            message: "Expected number but \"" + action.text + "\" found."
-          };
-        } else {
-          reference1.object = parseInt(action.text) - 1;
-          reference1.error = ""
-        }
-      } else {
-        reference1.object = parseInt(action.text) - 1;
-        reference1.error = ""
-      }
-      let newState = {
-        ...state,
-        allSteps: new Map([...state.allSteps,
-        [action.id, 
-          validateStep({
-            ...state.allSteps.get(action.id),
-            reference1
-          }, state)]
-        ])
-      }
-      return newState;
-    }
-
-    case CHANGE_REFERENCE2: {
-      let reference2 = {
-        ...state.allSteps.get(action.id).reference2,
-        input: action.text,
-        error: ""
-      };
-      if (action.text !== "") {
-        if (state.rank.get(action.id) < parseInt(action.text) || parseInt(action.text) < 1) {
-          reference2.error = {
-            name: "IndexError",
-            message: "Index out of range."
-          };
-        } else if (isNaN(parseInt(action.text))) {
-          reference2.error = {
-            name: "SyntaxError",
-            message: "Expected number but \"" + action.text + "\" found."
-          };
-        } else {
-          reference2.object = parseInt(action.text) - 1;
-          reference2.error = ""
-        }
-      } else {
-        reference2.object = parseInt(action.text) - 1;
-        reference2.error = ""
-      }
-      let newState = {
-        ...state,
-        allSteps: new Map([...state.allSteps,
-        [action.id, 
-          validateStep({
-            ...state.allSteps.get(action.id),
-            reference2
-          }, state)]
-        ])
-      }
-      return newState;
     }
 
     case DELETE_STEP: {
@@ -308,23 +171,13 @@ const steps = (state = { order: [], allSteps: new Map(), rank: new Map() }, acti
     case CHANGE_CONST:
     case CHANGE_FUN:
     case CHANGE_PRED: {
-      const allSteps = new Map();
-      state.allSteps.forEach((step, id) => {
-        let object = step.formula.object;
-        let error = "";
-        try {
-          object = parseClause(step.formula.input,
-            getSymbols(language), getFactories(language));
-        } catch (e) {
-          error = e;
-        }
-        allSteps.set(id,
-          {
-            ...step,
-            formula: { ...step.formula, object, error }
-          }
-        );
-      });
+      const allSteps = new Map(state.allSteps);
+      for (let id of state.order) {
+        allSteps.set(id, validateStep(
+          step(allSteps.get(id), action, state, language),
+          { ...state, allSteps }
+        ));
+      }
       return { ...state, allSteps };
     }
 
@@ -389,7 +242,7 @@ function validateStep(step, state) {
     }
 
     default:
-      return {...step};
+      return { ...step };
   }
 }
 
@@ -407,45 +260,6 @@ function getPremise(reference, state) {
     return premise;
   }
   return null;
-}
-
-function getFactories(language) {
-  function checkArity(symbol, args, arityMap, { expected }) {
-    const a = arityMap.get(symbol);
-    if (args.length !== a) {
-      expected(`${a} argument${(a == 1 ? '' : 's')} to ${symbol}`);
-    }
-  }
-  return {
-    variable: (symbol, _) =>
-      new Variable(symbol),
-    constant: (symbol, _) =>
-      new Constant(symbol),
-    functionApplication: (funSymbol, args, ee) => {
-      checkArity(funSymbol, args, language.funs.object, ee);
-      return new Function(funSymbol, args);
-    },
-    literal: (negated, predSymbol, args, ee) => {
-      checkArity(predSymbol, args, language.preds.object, ee);
-      return new Literal(negated, predSymbol, args);
-    },
-    clause: (literals, _) =>
-      new Clause(literals)
-  }
-}
-
-function getSymbols(language) {
-  const nonLogicalSymbols = new Set([...language.consts.object, ...language.funs.object.keys(), ...language.preds.object.keys()]);
-  return {
-    isConstant: (symbol) =>
-      language.consts.object.has(symbol),
-    isFunction: (symbol) =>
-      language.funs.object.has(symbol),
-    isPredicate: (symbol) =>
-      language.preds.object.has(symbol),
-    isVariable: (symbol) =>
-      !nonLogicalSymbols.has(symbol),
-  }
 }
 
 export default steps;
