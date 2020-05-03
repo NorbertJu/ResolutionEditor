@@ -1,20 +1,16 @@
-import { CHANGE_STEP, CHANGE_RULE, CHANGE_RENAMING, CHANGE_REFERENCE1, CHANGE_REFERENCE2, CHANGE_UNIFIER, CHANGE_CONST, CHANGE_FUN, CHANGE_PRED } from '../actions'
+import { CHANGE_STEP, CHANGE_RULE, CHANGE_RENAMING, CHANGE_REFERENCE1, CHANGE_REFERENCE2, CHANGE_UNIFIER} from '../actions'
 import { parseClause, parseSubstitution } from '@fmfi-uk-1-ain-412/js-fol-parser';
 import { Variable, Constant, Function, Literal, Clause } from '../model/index'
 
-const step = (step, action, state, language) => {
+export const step = (step, action) => {
   switch (action.type) {
     case CHANGE_STEP: {
-      let formula = {
-        ...step.formula,
-        error: ""
-      }
-      if (!action.check) {
-        formula.input = action.text;
-      }
       return {
         ...step,
-        formula: validateClause(formula, language)
+        formula: {
+          ...step.formula,
+          input: action.text
+        }
       };
     }
 
@@ -25,87 +21,32 @@ const step = (step, action, state, language) => {
     case CHANGE_RENAMING: {
       return {
         ...step,
-        renaming: validateRenaming({
+        renaming:{
           ...step.renaming,
-          input: action.text,
-          error: ""
-        }, language)
+          input: action.text
+        }
       };
     }
 
     case CHANGE_UNIFIER: {
-      return { ...step, unifier: validateUnifier({
+      return { ...step, unifier: {
         ...step.unifier,
-        input: action.text,
-        error: ""
-      }, language) };
+        input: action.text
+      }};
     }
 
     case CHANGE_REFERENCE1: {
-      let reference1 = {
+      return { ...step, reference1 : {
         ...step.reference1,
-        input: action.text,
-        error: ""
-      };
-      if (action.text !== "") {
-        if (state.rank.get(action.id) < parseInt(action.text) || parseInt(action.text) < 1) {
-          reference1.error = {
-            name: "IndexError",
-            message: "Index out of range."
-          };
-        } else if (isNaN(parseInt(action.text))) {
-          reference1.error = {
-            name: "SyntaxError",
-            message: "Expected number but \"" + action.text + "\" found."
-          };
-        } else {
-          reference1.object = parseInt(action.text) - 1;
-          reference1.error = ""
-        }
-      } else {
-        reference1.object = parseInt(action.text) - 1;
-        reference1.error = ""
-      }
-      return { ...step, reference1 };
+        input: action.text
+      }};
     }
 
     case CHANGE_REFERENCE2: {
-      let reference2 = {
+      return { ...step, reference2 : {
         ...step.reference2,
-        input: action.text,
-        error: ""
-      };
-      if (action.text !== "") {
-        if (state.rank.get(action.id) < parseInt(action.text) || parseInt(action.text) < 1) {
-          reference2.error = {
-            name: "IndexError",
-            message: "Index out of range."
-          };
-        } else if (isNaN(parseInt(action.text))) {
-          reference2.error = {
-            name: "SyntaxError",
-            message: "Expected number but \"" + action.text + "\" found."
-          };
-        } else {
-          reference2.object = parseInt(action.text) - 1;
-          reference2.error = ""
-        }
-      } else {
-        reference2.object = parseInt(action.text) - 1;
-        reference2.error = ""
-      }
-      return { ...step, reference2 };
-    }
-
-    case CHANGE_CONST:
-    case CHANGE_FUN:
-    case CHANGE_PRED: {
-      return {
-        ...step,
-        formula: validateClause({ ...step.formula, error: "" }, language),
-        renaming: validateRenaming({ ...step.renaming, error: "" }, language),
-        unifier: validateUnifier({ ...step.unifier, error: "" }, language)
-      };
+        input: action.text
+      }};
     }
 
     default:
@@ -113,12 +54,12 @@ const step = (step, action, state, language) => {
   }
 }
 
-function validateRenaming(renaming, language) {
+export function validateRenaming(renaming, language) {
+  renaming.error = "";
   try {
     if (renaming.input !== "") {
       let subs = parseSubstitution(renaming.input, getSymbols(language), getFactories(language));
       renaming.object = new Map(subs);
-      console.log(renaming);
       for (const [key, value] of renaming.object) {
         if (!(value instanceof Variable)) {
           renaming.error = {
@@ -136,10 +77,11 @@ function validateRenaming(renaming, language) {
   } catch (e) {
     renaming.error = e;
   }
-  return renaming;
+  return [renaming.error ? false : true, renaming];
 }
 
-function validateUnifier(unifier, language) {
+export function validateUnifier(unifier, language) {
+  unifier.error = "";
   try {
     if (unifier.input !== "") {
       let subs = parseSubstitution(unifier.input, getSymbols(language), getFactories(language));
@@ -151,10 +93,36 @@ function validateUnifier(unifier, language) {
   } catch (e) {
     unifier.error = e;
   }
-  return unifier;
+  return [unifier.error ? false : true, unifier];
 }
 
-function validateSubs(subs) {
+export function validateReference(reference, id, state) {
+  reference.error = "";
+  if (reference.input !== "") {
+    if (state.rank.get(id) < parseInt(reference.input) || parseInt(reference.input) < 1) {
+      reference.error = {
+        name: "IndexError",
+        message: "Index out of range."
+      };
+    } else if (isNaN(parseInt(reference.input))) {
+      reference.error = {
+        name: "SyntaxError",
+        message: "Expected number but \"" + reference.input + "\" found."
+      };
+    } else {
+      reference.object = parseInt(reference.input) - 1;
+      reference.error = ""
+    }
+  } else {
+    reference.error = {
+      name: "EmptyError",
+      message: "This field cannot be empty"
+    }
+  }
+  return [reference.error ? false : true, reference];
+}
+
+export function validateSubs(subs) {
   for (let i = 0; i < subs.length; i++) {
     for (let j = i + 1; j < subs.length; j++) {
       if (subs[i][0] === subs[j][0]) {
@@ -168,7 +136,8 @@ function validateSubs(subs) {
   return "";
 }
 
-function validateClause(formula, language) {
+export function validateClause(formula, language) {
+  formula.error = "";
   try {
     formula.object = parseClause(
       formula.input,
@@ -178,10 +147,10 @@ function validateClause(formula, language) {
   } catch (e) {
     formula.error = e;
   }
-  return formula;
+  return [formula.error ? false : true, formula];
 }
 
-function getFactories(language) {
+export function getFactories(language) {
   function checkArity(symbol, args, arityMap, { expected }) {
     const a = arityMap.get(symbol);
     if (args.length !== a) {
@@ -206,7 +175,7 @@ function getFactories(language) {
   }
 }
 
-function getSymbols(language) {
+export function getSymbols(language) {
   const nonLogicalSymbols = new Set([...language.consts.object, ...language.funs.object.keys(), ...language.preds.object.keys()]);
   return {
     isConstant: (symbol) =>
@@ -219,5 +188,3 @@ function getSymbols(language) {
       !nonLogicalSymbols.has(symbol),
   }
 }
-
-export default step;

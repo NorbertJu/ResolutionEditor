@@ -1,7 +1,5 @@
 import { ADD_STEP, CHANGE_STEP, DELETE_STEP, INSERT_STEP, STEP_UP, STEP_DOWN, CHANGE_RULE, CHANGE_RENAMING, CHANGE_REFERENCE1, CHANGE_REFERENCE2, CHANGE_UNIFIER, CHANGE_CONST, CHANGE_FUN, CHANGE_PRED } from '../actions'
-import { parseClause, parseSubstitution } from '@fmfi-uk-1-ain-412/js-fol-parser';
-import { Variable, Constant, Function, Literal, Clause } from '../model/index'
-import step from './step'
+import { step, validateReference, validateRenaming, validateUnifier, validateClause } from './step'
 
 const newStep = {
   formula: {
@@ -51,6 +49,11 @@ const steps = (state = { order: [], allSteps: new Map(), rank: new Map() }, acti
         ])
       })
 
+    case CHANGE_RULE:
+    case CHANGE_RENAMING:
+    case CHANGE_UNIFIER:
+    case CHANGE_REFERENCE1:
+    case CHANGE_REFERENCE2:
     case CHANGE_STEP: {
       const allSteps = new Map(state.allSteps);
       let from = state.rank.get(action.id);
@@ -61,41 +64,32 @@ const steps = (state = { order: [], allSteps: new Map(), rank: new Map() }, acti
         if (i === from) {
           checked.add(i);
           allSteps.set(id, validateStep(
-            step(s, action, state, language),
-            state
+            step(s, action),
+            id,
+            state,
+            language
           ));
         }
-        else if (s.rule === "Factoring" && checked.has(s.reference2.object) ||
-        s.rule === "Resolution" && (checked.has(s.reference2.object) || checked.has(s.reference1.object))) {
+        else if ((s.rule === "Factoring" && checked.has(s.reference2.object)) ||
+          (s.rule === "Resolution" && (checked.has(s.reference2.object) || checked.has(s.reference1.object)))) {
           checked.add(i);
-          action.check = true;
           allSteps.set(id, validateStep(
-            step(s, action, state, language),
-            { ...state, allSteps }
+            allSteps.get(id),
+            id,
+            { ...state, allSteps },
+            language
           ));
         }
       }
       return { ...state, allSteps };
     }
 
-    case CHANGE_RULE:
-    case CHANGE_RENAMING:
-    case CHANGE_UNIFIER:
-    case CHANGE_REFERENCE1:
-    case CHANGE_REFERENCE2: {
-      return {
-        ...state,
-        allSteps: new Map([...state.allSteps,
-        [action.id,
-        validateStep(step(state.allSteps.get(action.id), action, state, language), state)]
-        ])
-      };
-    }
-
     case DELETE_STEP: {
       let delOrder = state.rank.get(action.id);
       let newSteps = new Map([...state.allSteps]);
       newSteps.delete(action.id);
+      let newOrder = [...state.order.filter(id => id !== action.id)];
+      const position = state.rank.get(action.id);
       let newRank = new Map([...state.rank]);
       newRank.delete(action.id);
       for (let [key, value] of newRank.entries()) {
@@ -103,13 +97,28 @@ const steps = (state = { order: [], allSteps: new Map(), rank: new Map() }, acti
           newRank.set(key, value - 1)
         }
       }
+      for (let i = position + 1; i < state.order.length; i++) {
+        const id = state.order[i];
+        let step = newSteps.get(id);
+        newSteps.set(id, {
+          ...step,
+          reference1: checkReferenceAfterDelete({ ...step.reference1 }, position),
+          reference2: checkReferenceAfterDelete({ ...step.reference2 }, position)
+        })
+      }
+      let newState = { ...state, rank: newRank, order: newOrder, allSteps: newSteps };
+      for (let i = position; i < newState.order.length; i++) {
+        let id = newState.order[i];
+        newSteps.set(id, validateStep(
+          newSteps.get(id),
+          id,
+          { ...newState, newSteps },
+          language
+        ));
+      }
       return {
-        ...state,
-        order: [
-          ...state.order.filter(id => id !== action.id)
-        ],
-        allSteps: newSteps,
-        rank: newRank,
+        ...newState,
+        allSteps: newSteps
       };
     }
 
@@ -121,18 +130,37 @@ const steps = (state = { order: [], allSteps: new Map(), rank: new Map() }, acti
         }
       }
       newRank.set(action.id, action.position);
+      let newOrder = [
+        ...state.order.slice(0, action.position),
+        action.id,
+        ...state.order.slice(action.position)
+      ];
+      let newSteps = new Map([
+        ...state.allSteps,
+        [action.id, newStep]
+      ]);
+      for (let i = action.position + 1; i < state.order.length; i++) {
+        const id = state.order[i];
+        let step = newSteps.get(id);
+        newSteps.set(id, {
+          ...step,
+          reference1: checkReferenceAfterInsert({ ...step.reference1 }, action.position),
+          reference2: checkReferenceAfterInsert({ ...step.reference2 }, action.position)
+        })
+      }
+      let newState = { ...state, rank: newRank, order: newOrder, allSteps: newSteps };
+      for (let i = action.position + 1; i < newState.order.length; i++) {
+        let id = newState.order[i];
+        newSteps.set(id, validateStep(
+          newSteps.get(id),
+          id,
+          { ...newState, newSteps },
+          language
+        ));
+      }
       return {
-        ...state,
-        order: [
-          ...state.order.slice(0, action.position),
-          action.id,
-          ...state.order.slice(action.position)
-        ],
-        allSteps: new Map([
-          ...state.allSteps,
-          [action.id, newStep]
-        ]),
-        rank: newRank
+        ...newState,
+        allSteps: newSteps
       }
     }
 
@@ -140,15 +168,42 @@ const steps = (state = { order: [], allSteps: new Map(), rank: new Map() }, acti
       let newRank = new Map([...state.rank]);
       newRank.set(state.order[action.position], action.position - 1);
       newRank.set(state.order[action.position - 1], action.position);
+      let newOrder = [
+        ...state.order.slice(0, action.position - 1),
+        state.order[action.position],
+        state.order[action.position - 1],
+        ...state.order.slice(action.position + 1)
+      ]
+      let newSteps = new Map([...state.allSteps]);
+      for (let i = action.position - 1; i < state.order.length; i++) {
+        const id = state.order[i];
+        let step = newSteps.get(id);
+        newSteps.set(id, {
+          ...step,
+          reference1: checkReferenceAfterMove({ ...step.reference1 }, action.position, action.position - 1),
+          reference2: checkReferenceAfterMove({ ...step.reference2 }, action.position, action.position - 1)
+        })
+      }
+      let newState = { ...state, rank: newRank, order: newOrder, allSteps: newSteps };
+      let checked = new Set();
+      for (let i = action.position - 1; i < newState.order.length; i++) {
+        let id = newState.order[i];
+        let step = newSteps.get(id);
+        if (i === action.position - 1 || i === action.position ||
+          (step.rule === "Factoring" && checked.has(step.reference2.object)) ||
+          (step.rule === "Resolution" && (checked.has(step.reference2.object) || checked.has(step.reference1.object)))) {
+          checked.add(i);
+          newSteps.set(id, validateStep(
+            newSteps.get(id),
+            id,
+            { ...newState, newSteps },
+            language
+          ));
+        }
+      }
       return {
-        ...state,
-        order: [
-          ...state.order.slice(0, action.position - 1),
-          state.order[action.position],
-          state.order[action.position - 1],
-          ...state.order.slice(action.position + 1)
-        ],
-        rank: newRank
+        ...newState,
+        allSteps: newSteps
       }
     }
 
@@ -156,15 +211,42 @@ const steps = (state = { order: [], allSteps: new Map(), rank: new Map() }, acti
       let newRank = new Map([...state.rank]);
       newRank.set(state.order[action.position], action.position + 1);
       newRank.set(state.order[action.position + 1], action.position);
+      let newOrder = [
+        ...state.order.slice(0, action.position),
+        state.order[action.position + 1],
+        state.order[action.position],
+        ...state.order.slice(action.position + 2)
+      ]
+      let newSteps = new Map([...state.allSteps]);
+      for (let i = action.position; i < state.order.length; i++) {
+        const id = state.order[i];
+        let step = newSteps.get(id);
+        newSteps.set(id, {
+          ...step,
+          reference1: checkReferenceAfterMove({ ...step.reference1 }, action.position, action.position + 1),
+          reference2: checkReferenceAfterMove({ ...step.reference2 }, action.position, action.position + 1)
+        })
+      }
+      let newState = { ...state, rank: newRank, order: newOrder, allSteps: newSteps };
+      let checked = new Set();
+      for (let i = action.position; i < newState.order.length; i++) {
+        let id = newState.order[i];
+        let step = newSteps.get(id);
+        if (i === action.position || i === action.position + 1 ||
+          (step.rule === "Factoring" && checked.has(step.reference2.object)) ||
+          (step.rule === "Resolution" && (checked.has(step.reference2.object) || checked.has(step.reference1.object)))) {
+          checked.add(i);
+          newSteps.set(id, validateStep(
+            newSteps.get(id),
+            id,
+            { ...newState, newSteps },
+            language
+          ));
+        }
+      }
       return {
-        ...state,
-        order: [
-          ...state.order.slice(0, action.position),
-          state.order[action.position + 1],
-          state.order[action.position],
-          ...state.order.slice(action.position + 2)
-        ],
-        rank: newRank
+        ...newState,
+        allSteps: newSteps
       }
     }
 
@@ -174,8 +256,10 @@ const steps = (state = { order: [], allSteps: new Map(), rank: new Map() }, acti
       const allSteps = new Map(state.allSteps);
       for (let id of state.order) {
         allSteps.set(id, validateStep(
-          step(allSteps.get(id), action, state, language),
-          { ...state, allSteps }
+          step(allSteps.get(id), action),
+          id,
+          { ...state, allSteps },
+          language
         ));
       }
       return { ...state, allSteps };
@@ -186,25 +270,83 @@ const steps = (state = { order: [], allSteps: new Map(), rank: new Map() }, acti
   }
 }
 
-function validateStep(step, state) {
+function checkReferenceAfterInsert(reference, position) {
+  if (reference.object >= position) {
+    reference = {
+      object: reference.object + 1,
+      input: reference.object + 2 + "",
+      error: ""
+    }
+  }
+  return reference;
+}
+
+function checkReferenceAfterDelete(reference, position) {
+  if (reference.object > position) {
+    reference = {
+      object: reference.object - 1,
+      input: reference.object + "",
+      error: ""
+    }
+  } else if (reference.object === position) {
+    reference = {
+      object: undefined,
+      input: "",
+      error: ""
+    }
+  }
+  return reference;
+}
+
+function checkReferenceAfterMove(reference, position1, position2) {
+  if (reference.object === position1) {
+    reference = {
+      object: position2,
+      input: position2 + 1 + "",
+      error: ""
+    }
+  } else if (reference.object === position2) {
+    reference = {
+      object: position1,
+      input: position1 + 1 + "",
+      error: ""
+    }
+  }
+  return reference;
+}
+
+function validateStep(step, id, state, language) {
+  let reference1 = validateReference({ ...step.reference1 }, id, state);
+  let reference2 = validateReference({ ...step.reference2 }, id, state);
+  let renaming = validateRenaming({ ...step.renaming }, language);
+  let unifier = validateUnifier({ ...step.unifier }, language);
+  let formula = validateClause({ ...step.formula }, language)
+  let newStep = {
+    ...step,
+    reference1: reference1[1],
+    reference2: reference2[1],
+    renaming: renaming[1],
+    unifier: unifier[1],
+    formula: formula[1]
+  }
   switch (step.rule) {
     case "Factoring": {
-      if (!validReference(step.reference2)) {
-        return { ...step, valid: false };
+      if (!reference2[0]) {
+        return { ...newStep, valid: false };
       }
-      const premise = getPremise(step.reference2.object, state);
-      if (!premise || !validFormula(step.formula)) {
-        return { ...step, valid: false };
+      const premise = getPremise(reference2[1].object, state);
+      if (!premise || !formula[0]) {
+        return { ...newStep, valid: false };
       }
 
-      if (step.formula.object.isFactorOf(premise.formula.object, step.unifier.object)) {
-        return { ...step, valid: true, formula: { ...step.formula, error: "" } };
+      if (newStep.formula.object.isFactorOf(premise.formula.object, newStep.unifier.object)) {
+        return { ...newStep, valid: true, formula: { ...newStep.formula, error: "" } };
       } else {
         return {
-          ...step, valid: false, formula: {
-            ...step.formula, error: {
+          ...newStep, valid: false, formula: {
+            ...newStep.formula, error: {
               name: "LogicError",
-              message: "This clause is not valid factor of clause " + step.reference2.input
+              message: "This clause is not valid factor of clause " + newStep.reference2.input
             }
           }
         };
@@ -212,22 +354,22 @@ function validateStep(step, state) {
     }
 
     case "Resolution": {
-      if (!validReference(step.reference2) || !validReference(step.reference1)) {
-        return { ...step, valid: false };
+      if (!reference2[0] || !reference1[0]) {
+        return { ...newStep, valid: false };
       }
-      const premise1 = getPremise(step.reference1.object, state);
-      const premise2 = getPremise(step.reference2.object, state);
-      if (!premise1 || !premise2 || !validFormula(step.formula)) {
-        return { ...step, valid: false };
+      const premise1 = getPremise(reference1[1].object, state);
+      const premise2 = getPremise(reference2[1].object, state);
+      if (!premise1 || !premise2 || !formula[0]) {
+        return { ...newStep, valid: false };
       }
-      if (step.formula.object.isResolventOf(premise1.formula.object, premise2.formula.object, step.renaming.object, step.unifier.object)) {
-        return { ...step, valid: true, formula: { ...step.formula, error: "" } };
+      if (newStep.formula.object.isResolventOf(premise1.formula.object, premise2.formula.object, newStep.renaming.object, newStep.unifier.object)) {
+        return { ...newStep, valid: true, formula: { ...newStep.formula, error: "" } };
       } else {
         return {
-          ...step, valid: false, formula: {
-            ...step.formula, error: {
+          ...newStep, valid: false, formula: {
+            ...newStep.formula, error: {
               name: "LogicError",
-              message: "Clause is not valid resolvent of clauses " + step.reference1.input + " and " + step.reference2.input
+              message: "Clause is not valid resolvent of clauses " + newStep.reference1.input + " and " + newStep.reference2.input
             }
           }
         };
@@ -235,23 +377,15 @@ function validateStep(step, state) {
     }
 
     case "Assumption": {
-      if (!validFormula(step.formula)) {
-        return { ...step, valid: false };
+      if (!formula[0]) {
+        return { ...newStep, valid: false };
       }
-      return { ...step, valid: true };
+      return { ...newStep, valid: true };
     }
 
     default:
-      return { ...step };
+      return { ...newStep };
   }
-}
-
-function validFormula(formula) {
-  return formula.object !== undefined && (formula.error === "" || formula.error.name === "LogicError")
-}
-
-function validReference(reference) {
-  return reference.error === "" && reference.input !== ""
 }
 
 function getPremise(reference, state) {
