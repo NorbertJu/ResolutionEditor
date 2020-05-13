@@ -2,7 +2,9 @@
   "name": "resolution-editor",
   "version": "0.0.1",
   "private": true,
+  "homepage": "https://NorbertJu.github.io/ResolutionEditor",
   "devDependencies": {
+    "gh-pages": "^2.2.0",
     "react-scripts": "^3.0.0"
   },
   "dependencies": {
@@ -19,7 +21,9 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "eject": "react-scripts eject",
-    "test": "react-scripts test --env=node --passWithNoTests"
+    "test": "react-scripts test --env=node --passWithNoTests",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build"
   },
   "browserslist": [
     ">0.2%",

@@ -3,8 +3,8 @@ import { importState, exportState } from '../actions'
 import { connect } from 'react-redux'
 
 let ImportExport = ({ onImport, onExport}) => (
-  <div className="btn-group float-right" role="group">
-    <label htmlFor="fileUpload" className="btn btn-secondary btn-sm mb-0">⭱ Import</label>
+  <div className="float-right">
+    <label htmlFor="fileUpload" className="btn btn-secondary btn-sm mb-0 mr-1">Import</label>
     <input type="file" id="fileUpload" className="btn btn-secondary btn-sm d-none" onChange={
       event => { 
         let reader = new FileReader();
@@ -16,7 +16,7 @@ let ImportExport = ({ onImport, onExport}) => (
         reader.readAsText(event.target.files[0]);
         }
       } onClick={ event => event.target.value = ""}/>
-    <button type="button" className="btn btn-secondary btn-sm" onClick={onExport} >Export ⭳</button>
+    <button type="button" className="btn btn-secondary btn-sm" onClick={onExport} >Export</button>
   </div>
 )
 

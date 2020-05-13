@@ -37,7 +37,7 @@ function app(state = initialCombinedState, action) {
     }
     case EXPORT_STATE: {
       let link = document.createElement('a');
-      link.setAttribute("download", "resolution_state");
+      link.setAttribute("download", "resolutionProof");
       let stateCopy = {
         ...state, 
         language: {
@@ -61,7 +61,7 @@ function app(state = initialCombinedState, action) {
           rank: Array.from(state.steps.rank.entries())
         }
       }
-      let data = new Blob([JSON.stringify({state: stateCopy, id: nextStepId})], {type: 'text/plain'});
+      let data = new Blob([JSON.stringify({state: stateCopy, id: nextStepId})], {type: 'application/json'});
       let url = window.URL.createObjectURL(data);
       link.href = url;
       link.click();
