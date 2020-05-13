@@ -14,8 +14,14 @@ export const CHANGE_FUN = 'CHANGE_FUN';
 export const CHANGE_PRED = 'CHANGE_PRED';
 export const INPUT_FOCUS = 'INPUT_FOCUS';
 export const INPUT_BLUR = 'INPUT_BLUR';
+export const IMPORT_STATE = 'IMPORT_STATE';
+export const EXPORT_STATE = 'EXPORT_STATE';
 
-let nextStepId = 0;
+export let nextStepId = 0;
+
+export function setId(value) {
+  nextStepId = value;
+}
 
 export const inputFocus = (text) => ({
   type: INPUT_FOCUS,
@@ -102,4 +108,13 @@ export const moveStepUp = (position) => ({
 export const moveStepDown = (position) => ({
   type: STEP_DOWN,
   position
+})
+
+export const importState = (data) => ({
+  type: IMPORT_STATE,
+  data
+})
+
+export const exportState = () => ({
+  type: EXPORT_STATE
 })
