@@ -1,4 +1,4 @@
-import { ADD_STEP, CHANGE_STEP, DELETE_STEP, INSERT_STEP, STEP_UP, STEP_DOWN, CHANGE_RULE, CHANGE_RENAMING, CHANGE_REFERENCE1, CHANGE_REFERENCE2, CHANGE_UNIFIER, CHANGE_CONST, CHANGE_FUN, CHANGE_PRED } from '../actions'
+import { ADD_STEP, CHANGE_STEP, DELETE_STEP, INSERT_STEP, STEP_UP, STEP_DOWN, CHANGE_RULE, CHANGE_RENAMING, CHANGE_REFERENCE1, CHANGE_REFERENCE2, CHANGE_UNIFIER, CHANGE_CONST, CHANGE_FUN, CHANGE_PRED, IMPORT_STATE } from '../actions'
 import { step, validateReference, validateRenaming, validateUnifier, validateClause } from './step'
 
 const newStep = {
@@ -252,7 +252,8 @@ const steps = (state = { order: [], allSteps: new Map(), rank: new Map() }, acti
 
     case CHANGE_CONST:
     case CHANGE_FUN:
-    case CHANGE_PRED: {
+    case CHANGE_PRED: 
+    case IMPORT_STATE: {
       const allSteps = new Map(state.allSteps);
       for (let id of state.order) {
         allSteps.set(id, validateStep(
@@ -369,7 +370,7 @@ function validateStep(step, id, state, language) {
           ...newStep, valid: false, formula: {
             ...newStep.formula, error: {
               name: "LogicError",
-              message: "Clause is not valid resolvent of clauses " + newStep.reference1.input + " and " + newStep.reference2.input
+              message: "This clause is not valid resolvent of clauses " + newStep.reference1.input + " and " + newStep.reference2.input
             }
           }
         };
