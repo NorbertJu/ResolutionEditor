@@ -39,7 +39,7 @@ function app(state = initialCombinedState, action) {
       let link = document.createElement('a');
       link.setAttribute("download", "resolutionProof");
       let stateCopy = {
-        ...state, 
+        ...state,
         language: {
           ...state.language,
           consts: {
@@ -61,7 +61,7 @@ function app(state = initialCombinedState, action) {
           rank: Array.from(state.steps.rank.entries())
         }
       }
-      let data = new Blob([JSON.stringify({state: stateCopy, id: nextStepId})], {type: 'application/json'});
+      let data = new Blob([JSON.stringify({ state: stateCopy, id: nextStepId })], { type: 'application/json' });
       let url = window.URL.createObjectURL(data);
       link.href = url;
       link.click();
@@ -114,5 +114,43 @@ const undoableState = undoable(app, {
     }
   }
 })
+
+export function importState(stringData) {
+  let state = JSON.parse(stringData).state;
+  state.steps.allSteps = new Map(state.steps.allSteps);
+  state.steps.rank = new Map(state.steps.rank);
+  state.language.consts.object = new Set(state.language.consts.object);
+  state.language.funs.object = new Map(state.language.funs.object);
+  state.language.preds.object = new Map(state.language.preds.object);
+  return state;
+}
+
+export function exportState(state) {
+  return JSON.stringify({
+    state: {
+      ...state,
+      language: {
+        ...state.language,
+        consts: {
+          ...state.language.consts,
+          object: Array.from(state.language.consts.object)
+        },
+        funs: {
+          ...state.language.funs,
+          object: Array.from(state.language.funs.object.entries())
+        },
+        preds: {
+          ...state.language.preds,
+          object: Array.from(state.language.preds.object.entries())
+        }
+      },
+      steps: {
+        ...state.steps,
+        allSteps: Array.from(state.steps.allSteps.entries()),
+        rank: Array.from(state.steps.rank.entries())
+      }
+    }
+  });
+}
 
 export default undoableState;
