@@ -31,21 +31,21 @@ const newStep = {
   valid: false
 };
 
-const steps = (state = { order: [], allSteps: new Map(), rank: new Map() }, action = { type: undefined }, language) => {
+const steps = (state = { order: [], allSteps: new Map(), rank: new Map(), id: 0 }, action = { type: undefined }, language) => {
   switch (action.type) {
     case ADD_STEP:
       return Object.assign({}, state, {
         order: [
           ...state.order,
-          action.id,
+          state.id,
         ],
         allSteps: new Map([
           ...state.allSteps,
-          [action.id, newStep]
+          [state.id, newStep]
         ]),
         rank: new Map([
           ...state.rank,
-          [action.id, state.order.length]
+          [state.id++, state.order.length]
         ])
       })
 
@@ -129,15 +129,15 @@ const steps = (state = { order: [], allSteps: new Map(), rank: new Map() }, acti
           newRank.set(key, value + 1)
         }
       }
-      newRank.set(action.id, action.position);
+      newRank.set(state.id, action.position);
       let newOrder = [
         ...state.order.slice(0, action.position),
-        action.id,
+        state.id,
         ...state.order.slice(action.position)
       ];
       let newSteps = new Map([
         ...state.allSteps,
-        [action.id, newStep]
+        [state.id++, newStep]
       ]);
       for (let i = action.position + 1; i < state.order.length; i++) {
         const id = state.order[i];
