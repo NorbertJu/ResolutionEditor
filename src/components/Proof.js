@@ -4,7 +4,7 @@ import Step from './Step'
 
 const Proof = ({ steps, onStepDelete, onStepChange, onStepInsert, onStepUp, onStepDown, onRuleChange, onRenaming, onUnifier, onReference1, onReference2, inputFocus, inputBlur}) => (
   <div className="mt-2">
-    <h2>Proof</h2>
+    <h2 className="mb-0">Proof</h2>
     {steps.order.map((id, index) =>
       <Step
         key={id}

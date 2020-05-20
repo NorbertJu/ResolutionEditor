@@ -6,8 +6,7 @@ import Factoring from './FactoringParams'
 
 const Step = ({ index, step, onChange, onDelete, onInsert, onUp, onDown, onRule, onRenaming, onUnifier, onReference1, onReference2, onBlur, onFocus }) => (
   <div>
-    <button type="button" className="btn btn-light btn-sm" onClick={onInsert} style={{ float: "right" }}> + </button>
-
+    <button type="button" className="btn btn-light btn-sm float-right" onClick={onInsert}> + </button>
     <div className="input-group mb-2 input-group-sm">
       <div className="input-group-prepend">
         <span className="input-group-text">{index}</span>
