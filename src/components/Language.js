@@ -3,9 +3,9 @@ import ErrorMsg from '../components/ErrorMsg'
 
 const Language = ({language, onConstChange, onFunChange, onPredChange, onFocus, onBlur}) => {
     return (
-    <div className="mt-3">
+    <div className="mt-2">
         <h2>Language</h2>
-        <div className="input-group mb-3">
+        <div className="input-group mb-2 input-group-sm">
             <div className="input-group-prepend">
                 <span className="input-group-text" id="basic-addon1">Constants</span>
             </div>
@@ -17,7 +17,7 @@ const Language = ({language, onConstChange, onFunChange, onPredChange, onFocus, 
             <ErrorMsg error={language.consts.error} input={language.consts.input} />
         </div>
         
-        <div className="input-group mb-3">
+        <div className="input-group mb-2 input-group-sm">
             <div className="input-group-prepend">
                 <span className="input-group-text" id="basic-addon1">Functions</span>
             </div>
@@ -28,7 +28,7 @@ const Language = ({language, onConstChange, onFunChange, onPredChange, onFocus, 
             value={language.funs.input}/>
             <ErrorMsg error={language.funs.error} input={language.funs.input} />
         </div>
-        <div className="input-group mb-3">
+        <div className="input-group mb-2 input-group-sm">
             <div className="input-group-prepend">
                 <span className="input-group-text" id="basic-addon1">Predicates</span>
             </div>

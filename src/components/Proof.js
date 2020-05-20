@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import Step from './Step'
 
 const Proof = ({ steps, onStepDelete, onStepChange, onStepInsert, onStepUp, onStepDown, onRuleChange, onRenaming, onUnifier, onReference1, onReference2, inputFocus, inputBlur}) => (
-  <div style={{margin:'20px 0px'}}>
+  <div className="mt-2">
     <h2>Proof</h2>
     {steps.order.map((id, index) =>
       <Step

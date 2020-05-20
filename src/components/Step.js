@@ -8,7 +8,7 @@ const Step = ({ index, step, onChange, onDelete, onInsert, onUp, onDown, onRule,
   <div>
     <button type="button" className="btn btn-light btn-sm" onClick={onInsert} style={{ float: "right" }}> + </button>
 
-    <div className="input-group mb-3">
+    <div className="input-group mb-2 input-group-sm">
       <div className="input-group-prepend">
         <span className="input-group-text">{index}</span>
       </div>
@@ -20,7 +20,7 @@ const Step = ({ index, step, onChange, onDelete, onInsert, onUp, onDown, onRule,
         onFocus={e => onFocus(e.target.value)}
         value={step.formula.input}
       />
-      <div className="input-group-append">
+      <div className="input-group-append input-group-sm">
         <select className="form-control" 
         onChange={e => onRule(e.target.value)} 
         value={step.rule}>
