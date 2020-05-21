@@ -1,18 +1,18 @@
 {
   "files": {
-    "main.js": "/ResolutionEditor/static/js/main.7b7b7c56.chunk.js",
-    "main.js.map": "/ResolutionEditor/static/js/main.7b7b7c56.chunk.js.map",
+    "main.js": "/ResolutionEditor/static/js/main.7f6dc15f.chunk.js",
+    "main.js.map": "/ResolutionEditor/static/js/main.7f6dc15f.chunk.js.map",
     "runtime-main.js": "/ResolutionEditor/static/js/runtime-main.65f4431d.js",
     "runtime-main.js.map": "/ResolutionEditor/static/js/runtime-main.65f4431d.js.map",
     "static/js/2.14b41f20.chunk.js": "/ResolutionEditor/static/js/2.14b41f20.chunk.js",
     "static/js/2.14b41f20.chunk.js.map": "/ResolutionEditor/static/js/2.14b41f20.chunk.js.map",
     "index.html": "/ResolutionEditor/index.html",
-    "precache-manifest.0299b1cb3e7e31e37f58dd6f589aba83.js": "/ResolutionEditor/precache-manifest.0299b1cb3e7e31e37f58dd6f589aba83.js",
+    "precache-manifest.f8afea92d7e90fbdfa0e209465e989cd.js": "/ResolutionEditor/precache-manifest.f8afea92d7e90fbdfa0e209465e989cd.js",
     "service-worker.js": "/ResolutionEditor/service-worker.js"
   },
   "entrypoints": [
     "static/js/runtime-main.65f4431d.js",
     "static/js/2.14b41f20.chunk.js",
-    "static/js/main.7b7b7c56.chunk.js"
+    "static/js/main.7f6dc15f.chunk.js"
   ]
 }
