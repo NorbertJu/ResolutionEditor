@@ -17,12 +17,6 @@ export const INPUT_BLUR = 'INPUT_BLUR';
 export const IMPORT_STATE = 'IMPORT_STATE';
 export const EXPORT_STATE = 'EXPORT_STATE';
 
-export let nextStepId = 0;
-
-export function setId(value) {
-  nextStepId = value;
-}
-
 export const inputFocus = (text) => ({
   type: INPUT_FOCUS,
   text
@@ -34,8 +28,7 @@ export const inputBlur = (text) => ({
 })
 
 export const addStep = () => ({
-  type: ADD_STEP,
-  id: nextStepId++,
+  type: ADD_STEP
 })
 
 export const changeStep = (id, text) => ({
@@ -96,7 +89,6 @@ export const deleteStep = (id) => ({
 
 export const insertStep = (position) => ({
   type: INSERT_STEP,
-  id: nextStepId++,
   position
 })
 
