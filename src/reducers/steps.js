@@ -27,8 +27,7 @@ const newStep = {
     input: "",
     object: undefined,
     error: ""
-  },
-  valid: false
+  }
 };
 
 const steps = (state = { order: [], allSteps: new Map(), rank: new Map(), id: 0 }, action = { type: undefined }, language) => {
@@ -187,7 +186,7 @@ const steps = (state = { order: [], allSteps: new Map(), rank: new Map(), id: 0 
       let newState = { ...state, rank: newRank, order: newOrder, allSteps: newSteps };
       let checked = new Set();
       for (let i = action.position - 1; i < newState.order.length; i++) {
-        let id = newState.order[i];
+        const id = newState.order[i];
         let step = newSteps.get(id);
         if (i === action.position - 1 || i === action.position ||
           (step.rule === "Factoring" && checked.has(step.reference2.object)) ||
@@ -230,7 +229,7 @@ const steps = (state = { order: [], allSteps: new Map(), rank: new Map(), id: 0 
       let newState = { ...state, rank: newRank, order: newOrder, allSteps: newSteps };
       let checked = new Set();
       for (let i = action.position; i < newState.order.length; i++) {
-        let id = newState.order[i];
+        const id = newState.order[i];
         let step = newSteps.get(id);
         if (i === action.position || i === action.position + 1 ||
           (step.rule === "Factoring" && checked.has(step.reference2.object)) ||
