@@ -27,7 +27,8 @@ const newStep = {
     input: "",
     object: undefined,
     error: ""
-  }
+  },
+  valid: false
 };
 
 const steps = (state = { order: [], allSteps: new Map(), rank: new Map(), id: 0 }, action = { type: undefined }, language) => {
