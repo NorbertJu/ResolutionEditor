@@ -5,8 +5,7 @@ import Resolution from './ResolutionParams'
 import Factoring from './FactoringParams'
 
 const Step = ({ index, step, onChange, onDelete, onInsert, onUp, onDown, onRule, onRenaming, onUnifier, onReference1, onReference2, onBlur, onFocus }) => (
-  <div>
-    <button type="button" className="btn btn-light btn-xs float-right" onClick={onInsert}> + </button>
+  <div className="step">
     <div className="input-group mb-2 input-group-sm">
       <div className="input-group-prepend">
         <span className="input-group-text">{index}</span>
@@ -27,6 +26,7 @@ const Step = ({ index, step, onChange, onDelete, onInsert, onUp, onDown, onRule,
           <option>Resolution</option>
           <option>Factoring</option>
         </select>
+        <button type="button" className="btn btn-outline-success btn-sm" onClick={onInsert}> + </button>
         <button type="button" className="btn btn-outline-secondary btn-sm" onClick={onUp} disabled={onUp === null}> ↑ </button>
         <button type="button" className="btn btn-outline-secondary btn-sm" onClick={onDown} disabled={onDown === null}> ↓ </button>
         <button className="btn btn-outline-danger" type="button" onClick={onDelete} >X</button>
