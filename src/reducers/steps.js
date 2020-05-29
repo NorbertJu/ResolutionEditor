@@ -45,8 +45,9 @@ const steps = (state = { order: [], allSteps: new Map(), rank: new Map(), id: 0 
         ]),
         rank: new Map([
           ...state.rank,
-          [state.id++, state.order.length]
-        ])
+          [state.id, state.order.length]
+        ]),
+        id: state.id+1
       })
 
     case CHANGE_RULE:
@@ -137,7 +138,7 @@ const steps = (state = { order: [], allSteps: new Map(), rank: new Map(), id: 0 
       ];
       let newSteps = new Map([
         ...state.allSteps,
-        [state.id++, newStep]
+        [state.id, newStep]
       ]);
       for (let i = action.position + 1; i < state.order.length; i++) {
         const id = state.order[i];
@@ -148,7 +149,7 @@ const steps = (state = { order: [], allSteps: new Map(), rank: new Map(), id: 0 
           reference2: checkReferenceAfterInsert({ ...step.reference2 }, action.position)
         })
       }
-      let newState = { ...state, rank: newRank, order: newOrder, allSteps: newSteps };
+      let newState = { ...state, rank: newRank, order: newOrder, allSteps: newSteps, id: state.id+1 };
       for (let i = action.position + 1; i < newState.order.length; i++) {
         let id = newState.order[i];
         newSteps.set(id, validateStep(

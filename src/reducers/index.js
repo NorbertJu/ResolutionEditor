@@ -120,6 +120,7 @@ export function importState(stringData) {
   present.language.consts.object = new Set(present.language.consts.object);
   present.language.funs.object = new Map(present.language.funs.object);
   present.language.preds.object = new Map(present.language.preds.object);
+  present.steps = steps(present.steps, {type: IMPORT_STATE}, present.language);
   let newState = newHistory([], present, []);
   return newState;
 }

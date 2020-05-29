@@ -13,7 +13,7 @@ const Help = () => (
     </div>
     <div>
       <p className="mb-0">Proof - Alternative ways of writing logical symbols:</p>
-      <ul className=" fs-sm">
+      <ul className="fs-sm">
         <li >Disjunction: ∨, ||, |, \/</li>
         <li >Negation: ¬, -, !, ~</li>
         <li >Substitution: ↦, ->, ⟼, |-> or (var, term)</li>
